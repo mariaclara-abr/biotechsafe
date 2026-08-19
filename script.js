@@ -5,6 +5,14 @@
   var nav = document.getElementById('nav');
   var progressBar = document.getElementById('progressBar');
 
+  /* Mandatory scroll-snap only makes sense while stepping through the
+     full-screen chapters. Once the user has landed on/inside "Para o seu
+     negócio" (the snap point right after the last chapter), it becomes a
+     trap: that section is taller than the viewport and nothing after it
+     is a snap target, so the browser keeps pulling the page back to its
+     top instead of letting the user scroll into the rest of the page. */
+  var snapReleaseSection = document.getElementById('clientes');
+
   function onScroll() {
     var y = window.scrollY || window.pageYOffset;
     if (nav) nav.classList.toggle('is-scrolled', y > 40);
@@ -14,6 +22,10 @@
       var max = doc.scrollHeight - doc.clientHeight;
       var pct = max > 0 ? y / max : 0;
       progressBar.style.transform = 'scaleX(' + Math.min(1, Math.max(0, pct)) + ')';
+    }
+
+    if (snapReleaseSection) {
+      document.documentElement.classList.toggle('snap-released', y >= snapReleaseSection.offsetTop);
     }
   }
   document.addEventListener('scroll', onScroll, { passive: true });
@@ -76,36 +88,20 @@
       }, { threshold: 0.05 });
       visIO.observe(chaptersWrap);
 
-      /* As soon as "Para o seu negócio" starts arriving, release the sensor
-         and send it rising off the top of the page, so it's fully clear of
-         the section's photo by the time the scroll snap settles there. */
-      var clientesSection = document.getElementById('clientes');
+      /* As soon as "Para o seu negócio" starts arriving, animate the sensor
+         upward with the final chapter instead of making it abruptly vanish. */
+      var clientesSection = snapReleaseSection;
       if (clientesSection && sensorPos) {
         var releaseIO = new IntersectionObserver(function (entries) {
           entries.forEach(function (entry) {
             if (entry.isIntersecting) {
-              var finalTop = window.scrollY - window.innerHeight * 0.6;
-              if (!sensorPos.classList.contains('is-released')) {
-                var startTop = window.scrollY + window.innerHeight * 0.5;
-                sensorPos.style.top = startTop + 'px';
-                sensorPos.classList.add('is-released');
-                requestAnimationFrame(function () {
-                  requestAnimationFrame(function () {
-                    sensorPos.style.top = finalTop + 'px';
-                  });
-                });
-              } else {
-                /* Safety net: guarantee it's fully clear once settled here,
-                   even if the rise above hasn't finished yet. */
-                sensorPos.style.top = finalTop + 'px';
-              }
+              sensorPos.classList.add('is-leaving');
             } else if (entry.boundingClientRect.top >= 0) {
-              /* Scrolled back above "Para o seu negócio": pin it again. */
-              sensorPos.classList.remove('is-released');
-              sensorPos.style.top = '';
+              /* Scrolled back above "Para o seu negócio": bring it back. */
+              sensorPos.classList.remove('is-leaving');
             }
           });
-        }, { threshold: [0.01, 0.4] });
+        }, { threshold: 0.01 });
         releaseIO.observe(clientesSection);
       }
     } else {
@@ -117,38 +113,16 @@
     setActive(0);
   }
 
-  /* ---------------- Clientes: açougue / restaurante (selecionável) ---------------- */
-  var clientesGrid = document.getElementById('clientesGrid');
-  var clientesCards = clientesGrid ? clientesGrid.querySelectorAll('.clientes__card') : [];
-  var clientesCtaTitle = document.getElementById('clientesCtaTitle');
-  var clientesCtaLink = document.getElementById('clientesCtaLink');
-  var clientesCtaDefaultTitle = clientesCtaTitle ? clientesCtaTitle.textContent : '';
-
-  if (clientesCards.length) {
-    function selectCliente(card) {
-      var isSame = card.getAttribute('aria-checked') === 'true';
-      clientesCards.forEach(function (c) { c.setAttribute('aria-checked', 'false'); });
-
-      if (isSame) {
-        if (clientesCtaTitle) clientesCtaTitle.textContent = clientesCtaDefaultTitle;
-        if (clientesCtaLink) {
-          clientesCtaLink.href = 'mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe';
-        }
-        return;
-      }
-
-      card.setAttribute('aria-checked', 'true');
-      var negocio = card.getAttribute('data-negocio');
-      if (clientesCtaTitle) {
-        clientesCtaTitle.textContent = 'Quer a BioTechSafe no seu ' + negocio + '?';
-      }
-      if (clientesCtaLink) {
-        clientesCtaLink.href = 'mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe%20no%20meu%20' + encodeURIComponent(negocio);
+  /* ---------------- Negócio: prioriza o tipo escolhido na home ---------------- */
+  var detalhesGrid = document.getElementById('detalhesGrid');
+  if (detalhesGrid) {
+    var tipo = new URLSearchParams(window.location.search).get('tipo');
+    if (tipo === 'acougue' || tipo === 'restaurante') {
+      var priorityCard = detalhesGrid.querySelector('[data-negocio="' + tipo + '"]');
+      if (priorityCard) {
+        detalhesGrid.insertBefore(priorityCard, detalhesGrid.firstChild);
+        priorityCard.classList.add('is-priority');
       }
     }
-
-    clientesCards.forEach(function (card) {
-      card.addEventListener('click', function () { selectCliente(card); });
-    });
   }
 })();
