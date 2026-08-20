@@ -70,6 +70,27 @@
       if (scrollCue) scrollCue.style.opacity = idx === 0 ? '1' : '0';
     }
 
+    dots.forEach(function (dot, i) {
+      dot.addEventListener('click', function () {
+        /* Mandatory scroll-snap + scroll-snap-stop:always on each chapter
+           would otherwise force the scroll to halt at every chapter in
+           between instead of jumping straight to the target one. */
+        var html = document.documentElement;
+        var prevSnap = html.style.scrollSnapType;
+        function restoreSnap() {
+          html.style.scrollSnapType = prevSnap;
+          html.removeEventListener('scrollend', restoreSnap);
+        }
+        html.style.scrollSnapType = 'none';
+        if ('onscrollend' in window) {
+          html.addEventListener('scrollend', restoreSnap, { once: true });
+        } else {
+          setTimeout(restoreSnap, 900);
+        }
+        chapters[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
     if ('IntersectionObserver' in window) {
       var chapterIO = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
