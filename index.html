@@ -17,12 +17,16 @@
     <img src="assets/logo-symbol.png" alt="" aria-hidden="true">
     <span>BioTechSafe</span>
   </a>
-  <ul class="nav__links">
+  <button class="nav__toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav__links" id="navLinks">
     <li><a href="como-funciona.html">Como funciona</a></li>
     <li><a href="negocio.html">Para o seu negócio</a></li>
     <li><a href="sobre.html">Nossa história</a></li>
     <li><a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe" class="nav__cta">Fale conosco</a></li>
   </ul>
+  <div class="nav__backdrop" id="navBackdrop"></div>
 </nav>
 
 <!-- ============ STEPPED SCROLL CHAPTERS ============ -->
@@ -104,7 +108,7 @@
 
     <div class="clientes__grid" id="clientesGrid">
       <a href="negocio.html?tipo=acougue#detalhes" class="clientes__card reveal reveal-delay-1" data-negocio="acougue">
-        <h3>Tenha nosso sensor no seu açougue</h3>
+        <h3>O que o sensor BioTechSafe vai fazer com seu açougue:</h3>
         <ul class="clientes__list">
           <li>Menos desperdício, mais lucro</li>
           <li>Confiança que o cliente vê</li>
@@ -116,7 +120,7 @@
       </a>
 
       <a href="negocio.html?tipo=restaurante#detalhes" class="clientes__card reveal reveal-delay-2" data-negocio="restaurante">
-        <h3>Tenha nosso sensor no seu restaurante</h3>
+        <h3>O que o sensor BioTechSafe vai fazer com seu restaurante:</h3>
         <ul class="clientes__list">
           <li>Menos desperdício na cozinha</li>
           <li>Cozinha mais segura</li>

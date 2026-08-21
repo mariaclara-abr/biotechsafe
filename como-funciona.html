@@ -17,12 +17,16 @@
     <img src="assets/logo-symbol.png" alt="" aria-hidden="true">
     <span>BioTechSafe</span>
   </a>
-  <ul class="nav__links">
+  <button class="nav__toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav__links" id="navLinks">
     <li><a href="como-funciona.html">Como funciona</a></li>
     <li><a href="negocio.html">Para o seu negócio</a></li>
     <li><a href="sobre.html">Nossa história</a></li>
     <li><a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe" class="nav__cta">Fale conosco</a></li>
   </ul>
+  <div class="nav__backdrop" id="navBackdrop"></div>
 </nav>
 
 <header class="page-hero">
@@ -50,47 +54,10 @@
       </div>
     </div>
 
-    <div class="content-block reveal reveal-delay-1" style="margin-top: 70px;">
-      <p class="eyebrow">A construção</p>
-      <h2>Como o adesivo é montado</h2>
-      <p>O sensor é pensado para ficar colado do lado de fora da embalagem, protegido e funcional do transporte até o ponto de venda.</p>
-    </div>
-
-    <ol class="step-list reveal reveal-delay-1" style="list-style: none;">
-      <li>
-        <span class="step-n">01</span>
-        <div>
-          <h4>Núcleo funcional</h4>
-          <p>A parte central, onde vive o pigmento de antocianina, fica voltada para o ambiente interno da embalagem. É ali que a reação de cor acontece.</p>
-        </div>
-      </li>
-      <li>
-        <span class="step-n">02</span>
-        <div>
-          <h4>Membrana seletiva</h4>
-          <p>Uma camada interna permite a passagem do gás liberado pela carne, mas bloqueia líquidos que possam entrar em contato durante o transporte.</p>
-        </div>
-      </li>
-      <li>
-        <span class="step-n">03</span>
-        <div>
-          <h4>Camada protetora externa</h4>
-          <p>Um filme com baixa permeabilidade à umidade sela e protege o sensor do ambiente externo, sem interferir na leitura visual da cor.</p>
-        </div>
-      </li>
-      <li>
-        <span class="step-n">04</span>
-        <div>
-          <h4>Borda adesiva</h4>
-          <p>Fixa o sensor com segurança do lado externo de qualquer embalagem padrão de açougue ou restaurante, sem alterar a rotina de embalagem atual.</p>
-        </div>
-      </li>
-    </ol>
-
-    <div class="science-grid reveal reveal-delay-2" style="margin-top: 70px;">
+    <div class="science-grid reveal reveal-delay-1" style="margin-top: 70px;">
       <div class="science-card">
         <h4>Por que jabuticaba?</h4>
-        <p>Uma fruta nativa brasileira, rica em antocianinas, com cadeia de fornecimento local. Isso mantém o sensor natural, de baixo custo e alinhado à nossa origem.</p>
+        <p>Uma fruta nativa brasileira, rica em antocianinas, com cadeia de fornecimento local. Isso mantém o sensor natural e alinhado à nossa origem.</p>
       </div>
       <div class="science-card">
         <h4>Apoio científico</h4>

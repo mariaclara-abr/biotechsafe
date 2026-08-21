@@ -32,6 +32,35 @@
   window.addEventListener('load', onScroll);
   onScroll();
 
+  /* ---------------- Mobile nav (side drawer) ---------------- */
+  var navToggle = document.getElementById('navToggle');
+  var navBackdrop = document.getElementById('navBackdrop');
+  var navLinks = document.getElementById('navLinks');
+  if (nav && navToggle) {
+    function closeNav() {
+      nav.classList.remove('is-open');
+      navToggle.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+    function openNav() {
+      nav.classList.add('is-open');
+      navToggle.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+    navToggle.addEventListener('click', function () {
+      if (nav.classList.contains('is-open')) closeNav(); else openNav();
+    });
+    if (navBackdrop) navBackdrop.addEventListener('click', closeNav);
+    if (navLinks) {
+      navLinks.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', closeNav);
+      });
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeNav();
+    });
+  }
+
   /* ---------------- Reveal on scroll ---------------- */
   var revealEls = document.querySelectorAll('.reveal');
   if ('IntersectionObserver' in window && revealEls.length) {

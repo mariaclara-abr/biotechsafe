@@ -17,12 +17,16 @@
     <img src="assets/logo-symbol.png" alt="" aria-hidden="true">
     <span>BioTechSafe</span>
   </a>
-  <ul class="nav__links">
+  <button class="nav__toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav__links" id="navLinks">
     <li><a href="como-funciona.html">Como funciona</a></li>
     <li><a href="negocio.html">Para o seu negócio</a></li>
     <li><a href="sobre.html">Nossa história</a></li>
     <li><a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe" class="nav__cta">Fale conosco</a></li>
   </ul>
+  <div class="nav__backdrop" id="navBackdrop"></div>
 </nav>
 
 <header class="page-hero">
@@ -70,12 +74,12 @@
 <section class="section--pad clientes" id="detalhes">
   <div class="wrap">
     <p class="eyebrow reveal">Benefícios detalhados</p>
-    <h2 class="reveal">Os benefícios, negócio por negócio.</h2>
+    <h2 class="reveal">Por que usar nosso sensor?</h2>
 
     <div class="negocio-detail__grid" id="detalhesGrid">
       <div class="negocio-detail__card reveal reveal-delay-1" data-negocio="acougue">
         <span class="tag">Açougue</span>
-        <h3>Tenha nosso sensor no seu açougue</h3>
+        <h3>O que o sensor BioTechSafe vai fazer com seu açougue:</h3>
         <ul class="clientes__list">
           <li>Menos desperdício: vende a peça certa na hora certa, sem jogar carne boa fora por precaução</li>
           <li>Reputação que se vê: o cliente confere a frescura com os próprios olhos, sem precisar confiar só na sua palavra</li>
@@ -90,7 +94,7 @@
 
       <div class="negocio-detail__card reveal reveal-delay-2" data-negocio="restaurante">
         <span class="tag">Restaurante</span>
-        <h3>Tenha nosso sensor no seu restaurante</h3>
+        <h3>O que o sensor BioTechSafe vai fazer com seu restaurante:</h3>
         <ul class="clientes__list">
           <li>Economia real na cozinha: menos peças caras descartadas por excesso de precaução</li>
           <li>Cozinha mais segura: a equipe vê no sensor quando uma peça está no limite, sem abrir a embalagem</li>
