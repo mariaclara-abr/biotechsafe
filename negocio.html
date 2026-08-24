@@ -12,7 +12,7 @@
 
 <div class="progress-bar" id="progressBar"></div>
 
-<nav class="nav" id="nav">
+<nav class="nav on-dark" id="nav">
   <a href="index.html" class="nav__brand">
     <img src="assets/logo-symbol.png" alt="" aria-hidden="true">
     <span>BioTechSafe</span>
@@ -21,19 +21,30 @@
     <span></span><span></span><span></span>
   </button>
   <ul class="nav__links" id="navLinks">
-    <li><a href="como-funciona.html">Como funciona</a></li>
+    <li class="nav__dropdown">
+      <button type="button" class="nav__dropdown-trigger" aria-haspopup="true" aria-expanded="false">Conheça <span class="nav__dropdown-caret" aria-hidden="true">▾</span></button>
+      <ul class="nav__dropdown-menu">
+        <li><a href="sobre.html">Nossa história</a></li>
+        <li><a href="como-funciona.html">Como funciona</a></li>
+      </ul>
+    </li>
     <li><a href="negocio.html">Para o seu negócio</a></li>
-    <li><a href="sobre.html">Nossa história</a></li>
-    <li><a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe" class="nav__cta">Fale conosco</a></li>
+    <li><a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe" class="nav__cta">Adquira o sensor</a></li>
   </ul>
   <div class="nav__backdrop" id="navBackdrop"></div>
 </nav>
 
-<header class="page-hero">
+<header class="page-hero page-hero--business">
   <div class="wrap">
     <a href="index.html" class="breadcrumb">← Voltar para a página inicial</a>
+    <p class="page-hero__code">B2B / OPERAÇÃO / QUALIDADE</p>
     <h1 class="reveal is-visible">Leve modernidade para o seu açougue. Ou para o seu restaurante.</h1>
     <p class="reveal is-visible">A primeira fase da BioTechSafe é para quem vende carne todos os dias e sente na pele o custo de errar o ponto de descarte: açougues e restaurantes premium.</p>
+    <div class="page-hero__specs" aria-label="Características do produto">
+      <span><strong>Visual</strong> leitura imediata</span>
+      <span><strong>Individual</strong> peça por peça</span>
+      <span><strong>Prático</strong> embalagem fechada</span>
+    </div>
   </div>
 </header>
 
@@ -78,22 +89,22 @@
 
     <div class="negocio-detail__grid" id="detalhesGrid">
       <div class="negocio-detail__card reveal reveal-delay-1" data-negocio="acougue">
-        <span class="tag">Açougue</span>
+        <span class="tag">01 / Açougue</span>
         <h3>O que o sensor BioTechSafe vai fazer com seu açougue:</h3>
         <ul class="clientes__list">
-          <li>Menos desperdício: vende a peça certa na hora certa, sem jogar carne boa fora por precaução</li>
-          <li>Reputação que se vê: o cliente confere a frescura com os próprios olhos, sem precisar confiar só na sua palavra</li>
-          <li>Fim das surpresas: acaba com aquele susto de abrir a embalagem e descobrir que estragou</li>
           <li>Estoque sob controle: saiba qual peça vender primeiro, com mais precisão do que a validade da etiqueta</li>
           <li>Tecnologia na vitrine, que moderniza a loja e mostra que você leva a qualidade a sério</li>
-          <li>Praticidade no dia a dia: controle visual peça por peça, sem depender de planilha, faro ou memória</li>
+          <li>Menos desperdício: vende a peça certa na hora certa, sem jogar carne boa fora por precaução</li>
+          <li>Fim das surpresas: sem mais abrir a embalagem e descobrir que estragou</li>
           <li>Clientes fiéis, que confiam na qualidade e voltam sempre a comprar</li>
+          <li>Praticidade no dia a dia: controle visual peça por peça, sem depender de planilha, faro ou memória</li>
+          <li>Reputação visível: o cliente confere a frescura com os próprios olhos</li>
           <li>Indicação boca a boca: cliente satisfeito recomenda o açougue para amigos e família</li>
         </ul>
       </div>
 
       <div class="negocio-detail__card reveal reveal-delay-2" data-negocio="restaurante">
-        <span class="tag">Restaurante</span>
+        <span class="tag">02 / Restaurante</span>
         <h3>O que o sensor BioTechSafe vai fazer com seu restaurante:</h3>
         <ul class="clientes__list">
           <li>Economia real na cozinha: menos peças caras descartadas por excesso de precaução</li>
@@ -147,8 +158,11 @@
     </div>
 
     <div class="b2b__cta reveal" id="contato">
-      <h3>Quer ser um dos primeiros negócios com BioTechSafe?</h3>
-      <a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe%20no%20meu%20negócio" class="btn btn--primary">Fale com a gente</a>
+      <div>
+        <span class="cta-status"><i></i> Aproveite a exclusividade do momento</span>
+        <h3>Quer ser um dos primeiros negócios com BioTechSafe?</h3>
+      </div>
+      <a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe%20no%20meu%20negócio" class="btn btn--primary">Solicitar contato <span aria-hidden="true">↗</span></a>
     </div>
   </div>
 </section>
@@ -160,7 +174,7 @@
         <img src="assets/logo-symbol.png" alt="" aria-hidden="true">
         <span>BioTechSafe</span>
       </div>
-      <p class="footer__tag">Biotecnologia natural para quem vende, serve e come carne. Feito no Brasil.</p>
+      <p class="footer__tag">Biotecnologia natural para quem vende, serve e come carne.<br>Feito no Brasil, com ingredientes nacionais.</p>
     </div>
     <div class="footer__cols">
       <div class="footer__col">

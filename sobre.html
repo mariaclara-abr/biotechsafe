@@ -12,7 +12,7 @@
 
 <div class="progress-bar" id="progressBar"></div>
 
-<nav class="nav" id="nav">
+<nav class="nav on-dark" id="nav">
   <a href="index.html" class="nav__brand">
     <img src="assets/logo-symbol.png" alt="" aria-hidden="true">
     <span>BioTechSafe</span>
@@ -21,19 +21,30 @@
     <span></span><span></span><span></span>
   </button>
   <ul class="nav__links" id="navLinks">
-    <li><a href="como-funciona.html">Como funciona</a></li>
+    <li class="nav__dropdown">
+      <button type="button" class="nav__dropdown-trigger" aria-haspopup="true" aria-expanded="false">Conheça <span class="nav__dropdown-caret" aria-hidden="true">▾</span></button>
+      <ul class="nav__dropdown-menu">
+        <li><a href="sobre.html">Nossa história</a></li>
+        <li><a href="como-funciona.html">Como funciona</a></li>
+      </ul>
+    </li>
     <li><a href="negocio.html">Para o seu negócio</a></li>
-    <li><a href="sobre.html">Nossa história</a></li>
-    <li><a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe" class="nav__cta">Fale conosco</a></li>
+    <li><a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe" class="nav__cta">Adquira o sensor</a></li>
   </ul>
   <div class="nav__backdrop" id="navBackdrop"></div>
 </nav>
 
-<header class="page-hero">
+<header class="page-hero page-hero--about">
   <div class="wrap">
     <a href="index.html" class="breadcrumb">← Voltar para a página inicial</a>
+    <p class="page-hero__code">BRASIL / BIOTECNOLOGIA / IMPACTO</p>
     <h1 class="reveal is-visible">Duas fundadoras. Um problema real. Um sonho.</h1>
     <p class="reveal is-visible">A BioTechSafe nasceu do encontro entre biotecnologia aplicada e um problema que qualquer açougueiro reconhece na hora: a validade genérica nunca contou a história inteira.</p>
+    <div class="page-hero__specs" aria-label="Pilares da BioTechSafe">
+      <span><strong>Origem</strong> tecnologia brasileira</span>
+      <span><strong>Ciência</strong> UFRJ e UFSC</span>
+      <span><strong>Mercado</strong> operação B2B</span>
+    </div>
   </div>
 </header>
 
@@ -100,7 +111,7 @@
         <img src="assets/logo-symbol.png" alt="" aria-hidden="true">
         <span>BioTechSafe</span>
       </div>
-      <p class="footer__tag">Biotecnologia natural para quem vende, serve e come carne. Feito no Brasil.</p>
+      <p class="footer__tag">Biotecnologia natural para quem vende, serve e come carne.<br>Feito no Brasil, com ingredientes nacionais.</p>
     </div>
     <div class="footer__cols">
       <div class="footer__col">

@@ -21,10 +21,15 @@
     <span></span><span></span><span></span>
   </button>
   <ul class="nav__links" id="navLinks">
-    <li><a href="como-funciona.html">Como funciona</a></li>
+    <li class="nav__dropdown">
+      <button type="button" class="nav__dropdown-trigger" aria-haspopup="true" aria-expanded="false">Conheça <span class="nav__dropdown-caret" aria-hidden="true">▾</span></button>
+      <ul class="nav__dropdown-menu">
+        <li><a href="sobre.html">Nossa história</a></li>
+        <li><a href="como-funciona.html">Como funciona</a></li>
+      </ul>
+    </li>
     <li><a href="negocio.html">Para o seu negócio</a></li>
-    <li><a href="sobre.html">Nossa história</a></li>
-    <li><a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe" class="nav__cta">Fale conosco</a></li>
+    <li><a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe" class="nav__cta">Adquira o sensor</a></li>
   </ul>
   <div class="nav__backdrop" id="navBackdrop"></div>
 </nav>
@@ -100,6 +105,11 @@
       <div class="clientes__head-text">
         <h2 class="reveal">Tenha a BioTechSafe no seu negócio.</h2>
         <p class="reveal reveal-delay-1">Menos alimento desperdiçado e dinheiro perdido. Mais organização, fidelização e reputação.</p>
+        <div class="proof-strip reveal reveal-delay-1" aria-label="Diferenciais do sensor">
+          <span>Leitura visual</span>
+          <span>Peça por peça</span>
+          <span>Sem abrir</span>
+        </div>
       </div>
       <div class="clientes__head-media reveal reveal-delay-1">
         <img src="assets/sensor-on-meat.jpg" alt="Simulação do sensor BioTechSafe colado na embalagem de uma peça de carne, mostrando a cor roxa que indica frescor">
@@ -107,19 +117,21 @@
     </div>
 
     <div class="clientes__grid" id="clientesGrid">
-      <a href="negocio.html?tipo=acougue#detalhes" class="clientes__card reveal reveal-delay-1" data-negocio="acougue">
+      <a href="negocio.html?tipo=acougue#detalhes" class="clientes__card" data-negocio="acougue">
+        <span class="clientes__index">01 / Açougues</span>
         <h3>O que o sensor BioTechSafe vai fazer com seu açougue:</h3>
         <ul class="clientes__list">
-          <li>Menos desperdício, mais lucro</li>
-          <li>Confiança que o cliente vê</li>
-          <li>Fim das surpresas na embalagem</li>
-          <li>Estoque sob controle</li>
-          <li>Clientes fiéis, negócio moderno</li>
+          <li>Estoque sob controle: saiba qual peça vender primeiro com mais precisão</li>
+          <li>Tecnologia que moderniza a loja e mostra que qualidade é prioridade</li>
+          <li>Nunca mais venda uma peça estragada por engano</li>
+          <li>Gera clientes fiéis que recomendam o açougue</li>
+          <li>Praticidade no dia a dia: controle visual por peça</li>
         </ul>
         <span class="clientes__hint">Ver benefícios completos <span class="arrow">→</span></span>
       </a>
 
-      <a href="negocio.html?tipo=restaurante#detalhes" class="clientes__card reveal reveal-delay-2" data-negocio="restaurante">
+      <a href="negocio.html?tipo=restaurante#detalhes" class="clientes__card" data-negocio="restaurante">
+        <span class="clientes__index">02 / Restaurantes</span>
         <h3>O que o sensor BioTechSafe vai fazer com seu restaurante:</h3>
         <ul class="clientes__list">
           <li>Menos desperdício na cozinha</li>
@@ -133,8 +145,11 @@
     </div>
 
     <div class="clientes__cta reveal" id="clientesCta">
-      <h3 id="clientesCtaTitle">Quer ser um dos primeiros negócios com BioTechSafe?</h3>
-      <a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe" class="btn btn--primary" id="clientesCtaLink">Fale com a gente</a>
+      <div>
+        <span class="cta-status"><i></i> Aproveite a exclusividade do momento</span>
+        <h3 id="clientesCtaTitle">Quer ser um dos primeiros negócios com BioTechSafe?</h3>
+      </div>
+      <a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe" class="btn btn--primary" id="clientesCtaLink">Solicitar contato <span aria-hidden="true">↗</span></a>
     </div>
   </div>
 </section>
@@ -184,7 +199,7 @@
         <img src="assets/logo-symbol.png" alt="" aria-hidden="true">
         <span>BioTechSafe</span>
       </div>
-      <p class="footer__tag">Biotecnologia natural para quem vende, serve e come carne. Feito no Brasil.</p>
+      <p class="footer__tag">Biotecnologia natural para quem vende, serve e come carne.<br>Feito no Brasil, com ingredientes nacionais.</p>
     </div>
     <div class="footer__cols">
       <div class="footer__col">
