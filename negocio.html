@@ -30,7 +30,7 @@
     </li>
     <li><a href="index.html#faq">Perguntas frequentes</a></li>
     <li><a href="negocio.html">Para o seu negócio</a></li>
-    <li><a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe" class="nav__cta">Adquira o sensor</a></li>
+    <li><a href="#contato" class="nav__cta">Adquira o sensor</a></li>
   </ul>
   <div class="nav__backdrop" id="navBackdrop"></div>
 </nav>
@@ -38,9 +38,8 @@
 <header class="page-hero page-hero--business">
   <div class="wrap">
     <a href="index.html" class="breadcrumb">← Voltar para a página inicial</a>
-    <p class="page-hero__code">B2B / OPERAÇÃO / QUALIDADE</p>
     <h1 class="reveal is-visible">Leve modernidade para o seu negócio.</h1>
-    <p class="reveal is-visible">A primeira fase da BioTechSafe é para quem vende carne todos os dias e sente na pele o custo de errar o ponto de descarte: açougues e restaurantes premium.</p>
+    <p class="reveal is-visible">Melhore seu controle de estoque, evite desperdícios e consiga clientes fiéis.</p>
     <div class="page-hero__specs" aria-label="Características do produto">
       <span><strong>Visual</strong> leitura imediata</span>
       <span><strong>Individual</strong> peça por peça</span>
@@ -113,9 +112,9 @@
         <span class="tag">02 / Restaurante</span>
         <h3>BioTechSafe para restaurantes</h3>
         <ul class="clientes__list">
+          <li>Evita servir carne estragada por engano, protegendo a reputação do restaurante com os clientes</li>
           <li>Economia real na cozinha: menos peças caras descartadas por excesso de precaução</li>
           <li>Cozinha mais segura: a equipe vê no sensor quando uma peça está no limite, sem abrir a embalagem</li>
-          <li>Evita servir carne estragada por engano, protegendo a reputação do restaurante com os clientes</li>
           <li>Controle de estoque preciso: usa primeiro as peças mais próximas do verdadeiro ponto de vencimento</li>
           <li>Sabe a real "data de validade" de cada peça, com muito mais precisão do que a etiqueta</li>
           <li>Tecnologia que padroniza o controle de qualidade entre turnos e cozinheiros diferentes</li>
@@ -132,7 +131,7 @@
     <div class="info-cluster__head reveal">
       <p class="eyebrow">Fale com a gente</p>
       <h2>Entre em contato</h2>
-      <p>Preencha o formulário abaixo ou escreva direto para <a href="mailto:contato@biotechsafe.com.br">contato@biotechsafe.com.br</a>.</p>
+      <p>Faça um orçamento ou tire suas dúvidas.<br>Preencha o formulário abaixo ou escreva direto para <a href="mailto:contato@biotechsafe.com.br">contato@biotechsafe.com.br</a>.</p>
     </div>
 
     <form class="contact-form reveal reveal-delay-1" id="contactForm" action="https://api.web3forms.com/submit" method="POST">
@@ -164,9 +163,110 @@
         <textarea id="contactMensagem" name="message" rows="5" required></textarea>
       </div>
 
-      <button type="submit" class="btn btn--primary">Enviar mensagem</button>
+      <div class="contact-form__actions">
+        <button type="submit" class="btn btn--primary">Enviar mensagem</button>
+        <a href="#simulador" class="btn btn--ghost">Simule sua economia</a>
+      </div>
       <p class="contact-form__status" id="contactFormStatus" role="status" aria-live="polite"></p>
     </form>
+  </div>
+</section>
+
+<!-- ============ SIMULADOR DE ECONOMIA ============ -->
+<section class="section--pad calculator-section" id="simulador">
+  <div class="wrap">
+    <div class="calculator-section__head reveal">
+      <div>
+        <p class="eyebrow">Calculadora de impacto</p>
+        <h2>Transforme desperdício em margem para o seu negócio.</h2>
+      </div>
+      <div class="calculator-section__intro">
+        <p>Simule quanto a BioTechSafe pode preservar do seu estoque com uma leitura individual e mais precisa de cada peça.</p>
+        <span class="calculator-section__status"><i aria-hidden="true"></i> Projeção atualizada em tempo real</span>
+      </div>
+    </div>
+
+    <div class="calculator reveal reveal-delay-1">
+      <div class="calculator__form">
+        <div class="calculator__panel-head">
+          <span class="calculator__step">01</span>
+          <div>
+            <p class="calculator__panel-kicker">Seu cenário atual</p>
+            <h3>Informe as perdas mensais</h3>
+          </div>
+        </div>
+
+        <div class="calculator__row">
+          <div class="calculator__field">
+            <label for="calcReais">Perda de estoque por mês, em reais</label>
+            <div class="calculator__input-prefix">
+              <span aria-hidden="true">R$</span>
+              <input type="number" id="calcReais" min="0" step="100" inputmode="decimal" value="3000">
+            </div>
+          </div>
+          <div class="calculator__field">
+            <label for="calcKg">Perda de estoque por mês, em quilos de carne</label>
+            <div class="calculator__input-prefix">
+              <span aria-hidden="true">Kg</span>
+              <input type="number" id="calcKg" min="0" step="10" inputmode="decimal" value="60">
+            </div>
+          </div>
+        </div>
+
+        <div class="calculator__controls">
+          <div class="calculator__slider-field">
+            <div class="calculator__slider-head">
+              <label for="calcPremium">Quanto dessa carne perdida é premium?</label>
+              <span class="calculator__slider-value" id="calcPremiumValue">30%</span>
+            </div>
+            <input type="range" id="calcPremium" class="calculator__range" min="0" max="100" step="1" value="30">
+            <div class="calculator__range-meta" aria-hidden="true"><span>0%</span><span>100%</span></div>
+          </div>
+
+          <div class="calculator__slider-field">
+            <div class="calculator__slider-head">
+              <label for="calcMeses">Período da simulação</label>
+              <span class="calculator__slider-value" id="calcMesesValue">12 meses</span>
+            </div>
+            <input type="range" id="calcMeses" class="calculator__range" min="1" max="36" step="1" value="12">
+            <div class="calculator__range-meta" aria-hidden="true"><span>1 mês</span><span>36 meses</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="calculator__results" aria-live="polite">
+        <div class="calculator__results-head">
+          <span class="calculator__step">02</span>
+          <span>Potencial de economia</span>
+        </div>
+
+        <div class="calculator__results-main">
+          <p class="calculator__results-label">Economia estimada em <span id="calcResultMeses">12</span> meses</p>
+          <p class="calculator__results-value" id="calcResultTotal">R$ 0</p>
+          <p class="calculator__results-sub">Uma média de <span id="calcResultMensal">R$ 0</span> preservados por mês</p>
+        </div>
+
+        <div class="calculator__results-grid">
+          <div class="calculator__result-card">
+            <span class="calculator__result-index">Estoque preservado</span>
+            <span class="calculator__result-num" id="calcResultKg">0 kg</span>
+            <span class="calculator__result-tag">de carne podem deixar de virar prejuízo no período</span>
+          </div>
+          <div class="calculator__result-card">
+            <span class="calculator__result-index">Impacto do mix premium</span>
+            <span class="calculator__result-num" id="calcResultPremiumPct">0%</span>
+            <span class="calculator__result-tag">da economia mensal estimada vem das carnes premium</span>
+          </div>
+        </div>
+
+        <a href="#contato" class="calculator__cta">Quero reduzir meu desperdício <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+
+    <div class="calculator-section__note reveal reveal-delay-1">
+      <span>Premissas da simulação</span>
+      <p>Estimativa baseada em uma redução potencial de 80% do desperdício informado e em carnes premium com valor médio três vezes maior. O resultado é uma projeção e pode variar conforme a operação.</p>
+    </div>
   </div>
 </section>
 
