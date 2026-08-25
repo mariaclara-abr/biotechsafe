@@ -28,6 +28,7 @@
         <li><a href="como-funciona.html">Como funciona</a></li>
       </ul>
     </li>
+    <li><a href="index.html#faq">Perguntas frequentes</a></li>
     <li><a href="negocio.html">Para o seu negócio</a></li>
     <li><a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe" class="nav__cta">Adquira o sensor</a></li>
   </ul>
@@ -38,7 +39,7 @@
   <div class="wrap">
     <a href="index.html" class="breadcrumb">← Voltar para a página inicial</a>
     <p class="page-hero__code">B2B / OPERAÇÃO / QUALIDADE</p>
-    <h1 class="reveal is-visible">Leve modernidade para o seu açougue. Ou para o seu restaurante.</h1>
+    <h1 class="reveal is-visible">Leve modernidade para o seu negócio.</h1>
     <p class="reveal is-visible">A primeira fase da BioTechSafe é para quem vende carne todos os dias e sente na pele o custo de errar o ponto de descarte: açougues e restaurantes premium.</p>
     <div class="page-hero__specs" aria-label="Características do produto">
       <span><strong>Visual</strong> leitura imediata</span>
@@ -82,15 +83,20 @@
 </section>
 
 <!-- ============ DETALHES POR TIPO DE NEGÓCIO ============ -->
-<section class="section--pad clientes" id="detalhes">
+<section class="section--pad clientes clientes--purple" id="detalhes">
   <div class="wrap">
-    <p class="eyebrow reveal">Benefícios detalhados</p>
-    <h2 class="reveal">Por que usar nosso sensor?</h2>
+    <div class="negocio-detail__head">
+      <div>
+        <p class="eyebrow reveal">Benefícios detalhados</p>
+        <h2 class="reveal">Por que usar nosso sensor?</h2>
+      </div>
+      <p class="negocio-detail__intro reveal reveal-delay-1">Mais controle para a operação, menos desperdício e uma experiência de confiança que o cliente percebe em cada embalagem.</p>
+    </div>
 
     <div class="negocio-detail__grid" id="detalhesGrid">
-      <div class="negocio-detail__card reveal reveal-delay-1" data-negocio="acougue">
+      <div class="negocio-detail__card reveal reveal-delay-1" data-negocio="acougue" data-index="01">
         <span class="tag">01 / Açougue</span>
-        <h3>O que o sensor BioTechSafe vai fazer com seu açougue:</h3>
+        <h3>BioTechSafe para açougues</h3>
         <ul class="clientes__list">
           <li>Estoque sob controle: saiba qual peça vender primeiro, com mais precisão do que a validade da etiqueta</li>
           <li>Tecnologia na vitrine, que moderniza a loja e mostra que você leva a qualidade a sério</li>
@@ -103,9 +109,9 @@
         </ul>
       </div>
 
-      <div class="negocio-detail__card reveal reveal-delay-2" data-negocio="restaurante">
+      <div class="negocio-detail__card reveal reveal-delay-2" data-negocio="restaurante" data-index="02">
         <span class="tag">02 / Restaurante</span>
-        <h3>O que o sensor BioTechSafe vai fazer com seu restaurante:</h3>
+        <h3>BioTechSafe para restaurantes</h3>
         <ul class="clientes__list">
           <li>Economia real na cozinha: menos peças caras descartadas por excesso de precaução</li>
           <li>Cozinha mais segura: a equipe vê no sensor quando uma peça está no limite, sem abrir a embalagem</li>
@@ -120,50 +126,47 @@
   </div>
 </section>
 
-<!-- ============ VANTAGENS B2B ============ -->
-<section class="section--pad b2b" id="vantagens">
+<!-- ============ CONTATO ============ -->
+<section class="section--pad section--dim" id="contato">
   <div class="wrap">
-    <p class="eyebrow reveal">As vantagens</p>
-    <div class="b2b__head">
-      <h2 class="reveal">O que a BioTechSafe traz para o seu negócio.</h2>
-      <p class="reveal reveal-delay-1">Um adesivo simples, colado na embalagem, que resolve um problema que hoje custa dinheiro, confiança e desperdício.</p>
+    <div class="info-cluster__head reveal">
+      <p class="eyebrow">Fale com a gente</p>
+      <h2>Entre em contato</h2>
+      <p>Preencha o formulário abaixo ou escreva direto para <a href="mailto:contato@biotechsafe.com.br">contato@biotechsafe.com.br</a>.</p>
     </div>
 
-    <div class="b2b__grid">
-      <div class="b2b__card reveal reveal-delay-1">
-        <span class="tag">Economia</span>
-        <h3>Reduza o desperdício</h3>
-        <p>Menos carne boa jogada fora por precaução, e menos prejuízo com carne que estragou antes do previsto. Cada peça vendida no ponto certo é dinheiro que fica no seu caixa.</p>
-      </div>
-      <div class="b2b__card reveal reveal-delay-2">
-        <span class="tag">Monitoramento</span>
-        <h3>Peça por peça, sem custo alto</h3>
-        <p>Um monitoramento de qualidade individual e visual, sem equipamento caro e sem laboratório. Mais barato do que qualquer alternativa de análise disponível hoje.</p>
-      </div>
-      <div class="b2b__card reveal reveal-delay-3">
-        <span class="tag">Confiança</span>
-        <h3>Transparência que se vê</h3>
-        <p>Seu cliente não precisa confiar só na sua palavra. Ele vê, com os próprios olhos, através da embalagem, que aquela carne está fresca.</p>
-      </div>
-      <div class="b2b__card reveal reveal-delay-4">
-        <span class="tag">Fidelização</span>
-        <h3>Tecnologia que traz o cliente de volta</h3>
-        <p>Quem não volta a um lugar que mostra, na prática, que leva a qualidade da carne a sério? Modernidade visível é diferencial competitivo.</p>
-      </div>
-    </div>
+    <form class="contact-form reveal reveal-delay-1" id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+      <input type="hidden" name="access_key" value="SUA_ACCESS_KEY_WEB3FORMS_AQUI">
+      <input type="hidden" name="from_name" value="Site BioTechSafe">
+      <input type="hidden" name="subject" value="Novo contato pelo site BioTechSafe">
+      <input type="checkbox" name="botcheck" class="contact-form__botcheck" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-    <div class="b2b__proof reveal">
-      <span class="dot"></span>
-      Piloto em andamento com açougue parceiro
-    </div>
-
-    <div class="b2b__cta reveal" id="contato">
-      <div>
-        <span class="cta-status"><i></i> Aproveite a exclusividade do momento</span>
-        <h3>Quer ser um dos primeiros negócios com BioTechSafe?</h3>
+      <div class="contact-form__field">
+        <label for="contactNome">Nome</label>
+        <input type="text" id="contactNome" name="name" required>
       </div>
-      <a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe%20no%20meu%20negócio" class="btn btn--primary">Solicitar contato <span aria-hidden="true">↗</span></a>
-    </div>
+      <div class="contact-form__row">
+        <div class="contact-form__field">
+          <label for="contactEmpresa">Nome da empresa</label>
+          <input type="text" id="contactEmpresa" name="empresa" required>
+        </div>
+        <div class="contact-form__field">
+          <label for="contactCidade">Cidade da empresa</label>
+          <input type="text" id="contactCidade" name="cidade" required>
+        </div>
+      </div>
+      <div class="contact-form__field">
+        <label for="contactEmail">E-mail</label>
+        <input type="email" id="contactEmail" name="email" required>
+      </div>
+      <div class="contact-form__field">
+        <label for="contactMensagem">Mensagem</label>
+        <textarea id="contactMensagem" name="message" rows="5" required></textarea>
+      </div>
+
+      <button type="submit" class="btn btn--primary">Enviar mensagem</button>
+      <p class="contact-form__status" id="contactFormStatus" role="status" aria-live="polite"></p>
+    </form>
   </div>
 </section>
 
@@ -182,7 +185,7 @@
         <a href="como-funciona.html">Funcionamento do sensor</a>
         <a href="sobre.html">Nossa história</a>
         <a href="negocio.html">Tenha a BioTechSafe no seu negócio</a>
-        <a href="mailto:contato@biotechsafe.com.br?subject=Quero%20a%20BioTechSafe">Fale conosco</a>
+        <a href="negocio.html#contato">Fale conosco</a>
       </div>
       <div class="footer__col">
         <h5>Redes sociais</h5>

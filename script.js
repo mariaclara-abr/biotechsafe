@@ -163,6 +163,42 @@
     setActive(0);
   }
 
+  /* ---------------- Formulário de contato (Web3Forms) ---------------- */
+  var contactForm = document.getElementById('contactForm');
+  if (contactForm) {
+    var contactStatus = document.getElementById('contactFormStatus');
+    var contactSubmit = contactForm.querySelector('button[type="submit"]');
+    contactForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      contactSubmit.disabled = true;
+      contactStatus.textContent = 'Enviando...';
+      contactStatus.className = 'contact-form__status';
+
+      fetch(contactForm.action, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: new FormData(contactForm)
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          contactSubmit.disabled = false;
+          if (data.success) {
+            contactStatus.textContent = 'Mensagem enviada! Em breve entraremos em contato.';
+            contactStatus.className = 'contact-form__status is-success';
+            contactForm.reset();
+          } else {
+            contactStatus.textContent = 'Não foi possível enviar. Tente novamente ou escreva para contato@biotechsafe.com.br.';
+            contactStatus.className = 'contact-form__status is-error';
+          }
+        })
+        .catch(function () {
+          contactSubmit.disabled = false;
+          contactStatus.textContent = 'Não foi possível enviar. Tente novamente ou escreva para contato@biotechsafe.com.br.';
+          contactStatus.className = 'contact-form__status is-error';
+        });
+    });
+  }
+
   /* ---------------- Negócio: prioriza o tipo escolhido na home ---------------- */
   var detalhesGrid = document.getElementById('detalhesGrid');
   if (detalhesGrid) {
