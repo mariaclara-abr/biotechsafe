@@ -253,6 +253,32 @@
     var brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
     var kgFmt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
 
+    /* Reduz o font-size de um número quando ele fica largo demais para o
+       espaço disponível, garantindo que ele sempre apareça inteiro.
+       referenceEl é o elemento cuja largura define o espaço disponível
+       (o container, por padrão; o próprio elemento, no caso de inputs,
+       já que sua largura não muda com o font-size). */
+    function calcFitNumber(el, referenceEl) {
+      referenceEl = referenceEl || el.parentElement;
+      el.style.fontSize = '';
+      var available = referenceEl.clientWidth;
+      var needed = el.scrollWidth;
+      if (available > 0 && needed > available) {
+        var baseSize = parseFloat(window.getComputedStyle(el).fontSize);
+        var newSize = (baseSize * available / needed) * 0.96;
+        el.style.fontSize = newSize + 'px';
+      }
+    }
+
+    function calcFitAllResults() {
+      calcFitNumber(calcReais, calcReais);
+      calcFitNumber(calcKg, calcKg);
+      calcFitNumber(calcResultTotal);
+      calcFitNumber(calcResultMensal);
+      calcFitNumber(calcResultKg);
+      calcFitNumber(calcResultPremiumPct);
+    }
+
     function calcFillRange(input) {
       var min = Number(input.min) || 0;
       var max = Number(input.max) || 100;
@@ -295,10 +321,17 @@
 
       calcFillRange(calcPremium);
       calcFillRange(calcMeses);
+      calcFitAllResults();
     }
 
     [calcReais, calcKg, calcPremium, calcMeses].forEach(function (el) {
       el.addEventListener('input', calcular);
+    });
+
+    var calcResizeTimeout;
+    window.addEventListener('resize', function () {
+      clearTimeout(calcResizeTimeout);
+      calcResizeTimeout = setTimeout(calcFitAllResults, 120);
     });
 
     calcular();

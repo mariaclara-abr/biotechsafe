@@ -2326,7 +2326,12 @@ h1, h2, h3, h4 { font-weight: 600; }
   font-size: 0.9rem;
   color: rgba(255,255,255,0.58);
 }
-.calculator__results-sub span { color: var(--c-teal); font-weight: 600; }
+.calculator__results-sub span {
+  display: inline-block;
+  color: var(--c-teal);
+  font-weight: 600;
+  white-space: nowrap;
+}
 .calculator__results-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2359,6 +2364,7 @@ h1, h2, h3, h4 { font-weight: 600; }
   font-weight: 600;
   font-size: clamp(1.45rem, 2.4vw, 1.9rem);
   color: #fff;
+  white-space: nowrap;
 }
 .calculator__result-tag {
   font-size: 0.75rem;
