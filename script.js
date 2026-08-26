@@ -334,6 +334,13 @@
       calcResizeTimeout = setTimeout(calcFitAllResults, 120);
     });
 
+    /* A fonte Sora carrega de forma assíncrona (font-display: swap); a
+       primeira medição pode acontecer com a fonte de fallback, então
+       remedimos assim que a fonte real estiver pronta. */
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(calcFitAllResults);
+    }
+
     calcular();
   }
 

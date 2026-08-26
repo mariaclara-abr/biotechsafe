@@ -2342,6 +2342,7 @@ h1, h2, h3, h4 { font-weight: 600; }
 }
 .calculator__result-card {
   position: relative;
+  min-width: 0;
   background: var(--night-2);
   padding: 24px 20px 24px 0;
   display: flex;
