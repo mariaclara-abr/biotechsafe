@@ -2,7 +2,7 @@
    BioTechSafe Design System
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500&display=swap');
 
 :root {
   /* Freshness gradient, sampled from the sensor's real color scale */
@@ -427,14 +427,16 @@ html.snap-released {
 .chapter__inner h2 {
   color: #fff;
 }
-.chapter__inner h1 { font-size: clamp(2.4rem, 5vw, 4.2rem); font-weight: 500; }
+.chapter__inner h1 {
+  font-family: 'IBM Plex Serif', var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-weight: 400;
+  color: #fff;
+}
 .chapter__inner h1 em {
   font-style: normal;
-  font-weight: 400;
-  background: var(--gradient-fresh);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  font-weight: inherit;
+  color: inherit;
 }
 .chapter__inner h2 { font-size: clamp(2.1rem, 4.2vw, 3.3rem); max-width: 620px; }
 .chapter__inner p.chapter__sub {
@@ -464,7 +466,7 @@ html.snap-released {
   font-size: 12.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #C9BEE8;
+  color: var(--c-teal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -475,8 +477,8 @@ html.snap-released {
   content: '';
   width: 8px; height: 8px;
   border-radius: 50%;
-  background: var(--c-purple);
-  box-shadow: 0 0 0 4px rgba(78,46,134,0.35);
+  background: var(--c-teal);
+  box-shadow: 0 0 0 4px rgba(23,163,152,0.35);
 }
 
 .hero__wordmark {
