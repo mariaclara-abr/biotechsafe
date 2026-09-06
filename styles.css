@@ -382,6 +382,33 @@ html.snap-released {
 
 .chapters {
   position: relative;
+  isolation: isolate;
+}
+
+/* The sticky field stays inside the five chapters, below their text. */
+.chapter-photons {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+.chapter-photons__canvas {
+  position: sticky;
+  top: 0;
+  display: block;
+  width: 100%;
+  height: 100svh;
+  /* Keep the reading area quiet while light gathers around the sensor. */
+  mask-image: radial-gradient(ellipse 42% 38% at 28% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.12) 55%, rgba(0,0,0,0.65) 85%, #000 115%);
+}
+@media (max-width: 600px) {
+  .chapter-photons__canvas {
+    opacity: 0.72;
+    mask-image: radial-gradient(ellipse 54% 42% at 26% 50%, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.12) 65%, #000 120%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chapter-photons { display: none; }
 }
 
 /* Gives the mandatory snap a landing spot right after the last chapter,
@@ -440,7 +467,7 @@ html.snap-released {
 }
 .chapter__inner h2 { font-size: clamp(2.1rem, 4.2vw, 3.3rem); max-width: 620px; }
 .chapter__inner p.chapter__sub {
-  margin-top: 18px;
+  margin-top: 28px;
   margin-left: auto;
   margin-right: auto;
   font-size: 1.1rem;
@@ -448,7 +475,7 @@ html.snap-released {
   max-width: 480px;
 }
 .chapter__inner p.chapter__sub + p.chapter__statement {
-  margin-top: 18px;
+  margin-top: 28px;
 }
 .chapter__inner p.chapter__statement {
   font-family: var(--font-display);
@@ -471,7 +498,7 @@ html.snap-released {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 26px;
+  margin-bottom: 38px;
 }
 .hero__eyebrow::before {
   content: '';
@@ -486,7 +513,7 @@ html.snap-released {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  margin-top: 22px;
+  margin-top: 40px;
 }
 .hero__wordmark img { height: 34px; width: auto; filter: brightness(0) invert(1); opacity: 0.95; }
 .hero__wordmark span {
@@ -703,48 +730,7 @@ section { position: relative; }
 
 .home-illustration-flow {
   position: relative;
-  isolation: isolate;
-  overflow: hidden;
   background-color: var(--paper);
-}
-.home-illustration-flow::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image: url('assets/home-biotech-flow-executive.jpg');
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  background-position: center;
-  opacity: 0.76;
-  pointer-events: none;
-}
-.home-illustration-flow::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background:
-    linear-gradient(90deg, rgba(248, 246, 241, 0.18), rgba(248, 246, 241, 0.58) 34%, rgba(248, 246, 241, 0.58) 66%, rgba(248, 246, 241, 0.18)),
-    linear-gradient(180deg, rgba(248, 246, 241, 0.06), transparent 18%, transparent 82%, rgba(248, 246, 241, 0.36));
-  pointer-events: none;
-}
-.home-illustration-flow > .home-illustrated-tail {
-  z-index: 1;
-  background: transparent;
-}
-.home-illustrated-tail > .wrap {
-  position: relative;
-  z-index: 1;
-}
-.home-illustration-flow .home-illustrated-tail::before,
-.home-illustration-flow .home-illustrated-tail::after { content: none; }
-
-@media (max-width: 700px) {
-  .home-illustration-flow::before { opacity: 0.6; }
-  .home-illustration-flow::after {
-    background: rgba(248, 246, 241, 0.42);
-  }
 }
 
 .reveal {
@@ -1839,7 +1825,7 @@ h1, h2, h3, h4 { font-weight: 600; }
 .hero__eyebrow {
   justify-content: flex-start;
   gap: 12px;
-  color: rgba(255,255,255,0.6);
+  color: var(--c-teal);
 }
 .hero__eyebrow::before { display: none; }
 .hero__wordmark {
@@ -2614,27 +2600,6 @@ h1, h2, h3, h4 { font-weight: 600; }
   color: var(--c-teal);
 }
 .calculator__cta:focus-visible { outline: 2px solid var(--c-teal); outline-offset: 4px; }
-.calculator-section__note {
-  display: grid;
-  grid-template-columns: minmax(180px, 0.35fr) minmax(0, 1fr);
-  gap: 32px;
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--line-dark);
-}
-.calculator-section__note span {
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--c-teal);
-}
-.calculator-section__note p {
-  max-width: 780px;
-  font-size: 0.78rem;
-  line-height: 1.6;
-  color: rgba(255,255,255,0.42);
-}
 @media (max-width: 980px) {
   .calculator-section__head { grid-template-columns: 1fr; gap: 34px; }
   .calculator-section__intro { max-width: 680px; }
@@ -2662,7 +2627,6 @@ h1, h2, h3, h4 { font-weight: 600; }
   .calculator-section__intro { padding-left: 20px; }
   .calculator__form,
   .calculator__results { padding: 30px 24px; }
-  .calculator-section__note { grid-template-columns: 1fr; gap: 10px; }
 }
 @media (max-width: 420px) {
   .calculator__slider-head { align-items: flex-start; }

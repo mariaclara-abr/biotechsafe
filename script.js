@@ -88,7 +88,186 @@
   var skipIntro = document.getElementById('skipIntro');
   var sensorColors = ['#4E2E86', '#1E3A8C', '#72C7F0', '#A8E3BA', '#EDF29A'];
 
+  /* A few soft particles follow wide orbits only as the page scrolls.
+     Time fades their trails without changing their positions. */
+  function createPhotonField() {
+    var canvas = document.getElementById('chapterPhotons');
+    if (!canvas || !sensorColor) return null;
+    var ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var particles = [];
+    var width = 0;
+    var height = 0;
+    var start = 0;
+    var end = 0;
+    var lastScroll = window.scrollY;
+    var frame = 0;
+    var orbit = 0;
+    var colorUntil = 0;
+    var color = '';
+    var lightColor = '';
+    var glow = document.createElement('canvas');
+    glow.width = glow.height = 64;
+    var glowCtx = glow.getContext('2d');
+    if (!glowCtx) return null;
+    var trailLifetime = 2600;
+
+    function requestDraw() {
+      if (!frame && !reducedMotion.matches && !document.hidden) {
+        frame = requestAnimationFrame(draw);
+      }
+    }
+
+    function updateColor() {
+      var nextColor = window.getComputedStyle(sensorColor).backgroundColor;
+      if (nextColor === color) return;
+      color = nextColor;
+      /* A broad, translucent body keeps the sensor hue without a white point. */
+      var channels = color.match(/[\d.]+/g).slice(0, 3);
+      lightColor = 'rgb(' + channels.map(function (channel) {
+        return Math.round(Number(channel) + (255 - Number(channel)) * 0.25);
+      }).join(',') + ')';
+      glowCtx.clearRect(0, 0, 64, 64);
+      var halo = glowCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      halo.addColorStop(0, lightColor.replace('rgb(', 'rgba(').replace(')', ',0.65)'));
+      halo.addColorStop(0.28, lightColor.replace('rgb(', 'rgba(').replace(')', ',0.45)'));
+      halo.addColorStop(0.65, color.replace('rgb(', 'rgba(').replace(')', ',0.18)'));
+      halo.addColorStop(1, color.replace('rgb(', 'rgba(').replace(')', ',0)'));
+      glowCtx.fillStyle = halo;
+      glowCtx.fillRect(0, 0, 64, 64);
+    }
+
+    function position(particle) {
+      var angle = particle.phase + orbit * particle.speed * particle.direction;
+      return {
+        x: width * (particle.x + Math.cos(angle) * particle.orbitWidth),
+        y: height * (particle.y + Math.sin(angle) * particle.orbitHeight + Math.sin(angle * 2 + particle.phase) * 0.008)
+      };
+    }
+
+    function resize() {
+      var rect = canvas.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      var bounds = chaptersWrap.getBoundingClientRect();
+      start = bounds.top + window.scrollY;
+      end = start + bounds.height;
+      var ratio = Math.min(window.devicePixelRatio || 1, 1.75);
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      var count = width <= 600 ? 5 : 7;
+      particles = [];
+      for (var i = 0; i < count; i++) {
+        /* Separate, shallow ellipses let the particles weave horizontally. */
+        particles.push({
+          x: 0.48 + (i % 3) * 0.055,
+          y: 0.16 + i * 0.68 / (count - 1),
+          phase: i * 2.39996323 + 0.4,
+          speed: 0.8 + (i % 3) * 0.14,
+          direction: i % 2 ? -1 : 1,
+          orbitWidth: 0.3 + (i % 2) * 0.035,
+          orbitHeight: 0.045 + (i % 3) * 0.01,
+          radius: 3.2 + (i % 3) * 0.7,
+          alpha: 0.65 + (i % 3) * 0.1,
+          trail: []
+        });
+      }
+      lastScroll = window.scrollY;
+      requestDraw();
+    }
+
+    function draw(now) {
+      frame = 0;
+      var scroll = window.scrollY;
+      var delta = scroll - lastScroll;
+      lastScroll = scroll;
+      if (reducedMotion.matches || document.hidden || scroll >= end || scroll + height <= start) {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(function (particle) { particle.trail = []; });
+        return;
+      }
+
+      /* No drift or inertia: the orbit advances with scroll distance alone. */
+      orbit += delta / height * 1.4;
+      updateColor();
+      ctx.clearRect(0, 0, width, height);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      var hasTrails = false;
+      particles.forEach(function (particle) {
+        var point = position(particle);
+        var trail = particle.trail;
+        if (delta !== 0) {
+          if (Math.abs(delta) > height * 0.65) trail.length = 0;
+          trail.push({ x: point.x, y: point.y, time: now });
+        }
+        while (trail.length && (now - trail[0].time > trailLifetime || trail.length > 180)) trail.shift();
+
+        var alpha = particle.alpha;
+        if (trail.length > 1) {
+          hasTrails = true;
+          var oldest = trail[0];
+          var newest = trail[trail.length - 1];
+          var fade = Math.pow(1 - (now - newest.time) / trailLifetime, 1.3);
+          var tail = ctx.createLinearGradient(oldest.x, oldest.y, point.x, point.y);
+          tail.addColorStop(0, 'transparent');
+          tail.addColorStop(1, color);
+          ctx.beginPath();
+          ctx.moveTo(oldest.x, oldest.y);
+          trail.forEach(function (sample, index) {
+            var next = trail[index + 1] || point;
+            ctx.quadraticCurveTo(sample.x, sample.y, (sample.x + next.x) / 2, (sample.y + next.y) / 2);
+          });
+          ctx.lineTo(point.x, point.y);
+          ctx.strokeStyle = tail;
+          ctx.globalAlpha = alpha * fade * 0.1;
+          ctx.lineWidth = particle.radius * 2.4;
+          ctx.stroke();
+          ctx.globalAlpha = alpha * fade * 0.52;
+          ctx.lineWidth = particle.radius * 0.8;
+          ctx.stroke();
+        }
+
+        var bodyWidth = particle.radius * 5;
+        var bodyHeight = particle.radius * 3.8;
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(glow, point.x - bodyWidth / 2, point.y - bodyHeight / 2, bodyWidth, bodyHeight);
+      });
+      ctx.globalAlpha = 1;
+      /* After fading and the sensor transition finish, rendering sleeps. */
+      if (hasTrails || now < colorUntil) requestDraw();
+    }
+
+    function reset() {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      particles.forEach(function (particle) { particle.trail = []; });
+      ctx.clearRect(0, 0, width, height);
+      lastScroll = window.scrollY;
+      if (!reducedMotion.matches && !document.hidden) resize();
+    }
+
+    document.addEventListener('scroll', requestDraw, { passive: true });
+    window.addEventListener('resize', resize, { passive: true });
+    window.addEventListener('load', resize);
+    window.addEventListener('pageshow', reset);
+    document.addEventListener('visibilitychange', reset);
+    reducedMotion.addEventListener('change', reset);
+    resize();
+
+    return {
+      syncColor: function () {
+        colorUntil = performance.now() + 900;
+        requestDraw();
+      }
+    };
+  }
+
   if (chaptersWrap && chapters.length) {
+    var photons = createPhotonField();
     function setActive(idx) {
       var color = chapters[idx].style.getPropertyValue('--chapter-color') || '#4E2E86';
       if (sensorColor) {
@@ -96,6 +275,7 @@
         /* The first state uses the original photographed purple sensor. */
         sensorColor.style.opacity = idx === 0 ? '0' : '1';
       }
+      if (photons) photons.syncColor();
       dots.forEach(function (d, i) { d.classList.toggle('is-active', i === idx); });
       if (scrollCue) scrollCue.style.opacity = idx === 0 ? '1' : '0';
     }
