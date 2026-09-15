@@ -88,6 +88,110 @@
   var skipIntro = document.getElementById('skipIntro');
   var sensorColors = ['#4E2E86', '#1E3A8C', '#72C7F0', '#A8E3BA', '#EDF29A'];
 
+  /* Move the whole card along a scroll-driven path. Its fixed parent keeps
+     ownership of centering and the exit animation after the final chapter. */
+  function createSensorMotion() {
+    var card = sensorPos && sensorPos.querySelector('.sensor-float');
+    if (!card) return;
+
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    // Small vertical offsets and a flat rotation keep the card's proportions.
+    var poses = [
+      [0, 0],
+      [-0.8, 1.5],
+      [0.4, -1.2],
+      [-0.5, 1],
+      [0, 0]
+    ];
+    var stops = [];
+    var travelY = 0;
+    var tilt = 1;
+    var frame = 0;
+    var currentPose = null;
+    var lastFrameTime = 0;
+
+    function paint(pose) {
+      var angle = pose[1] * tilt;
+      card.style.transform = 'translate3d(0,' + (pose[0] * travelY).toFixed(3) + 'px,0) ' +
+        'rotate(' + angle.toFixed(3) + 'deg)';
+
+      card.style.setProperty('--sensor-shadow-x', ((8 - angle) * tilt).toFixed(2) + 'px');
+      card.style.setProperty('--sensor-shadow-y', ((24 - pose[0] * 2) * tilt).toFixed(2) + 'px');
+    }
+
+    function draw(now) {
+      frame = 0;
+      if (reducedMotion.matches) {
+        paint(poses[0]);
+        card.style.transform = '';
+        currentPose = null;
+        lastFrameTime = 0;
+        return;
+      }
+      if (document.hidden || !stops.length) {
+        lastFrameTime = 0;
+        return;
+      }
+
+      var scroll = window.scrollY;
+      var index = 0;
+      while (index < stops.length - 2 && scroll >= stops[index + 1]) index++;
+      var distance = stops[index + 1] - stops[index];
+      var progress = distance > 0 ? Math.min(1, Math.max(0, (scroll - stops[index]) / distance)) : 0;
+      // Match position, velocity and acceleration at the chapter boundaries.
+      var eased = progress * progress * progress * (progress * (progress * 6 - 15) + 10);
+      var from = poses[Math.min(index, poses.length - 1)];
+      var to = poses[Math.min(index + 1, poses.length - 1)];
+      var targetPose = from.map(function (value, axis) {
+        return value + (to[axis] - value) * eased;
+      });
+
+      // Frame-rate-independent damping softens wheel and touch input. Continue
+      // only until the card settles, so nothing keeps moving while idle.
+      var elapsed = lastFrameTime ? Math.min(now - lastFrameTime, 64) : 1000 / 60;
+      var blend = 1 - Math.exp(-elapsed / 160);
+      var settling = false;
+      if (!currentPose) currentPose = targetPose.slice();
+      currentPose = currentPose.map(function (value, axis) {
+        var difference = targetPose[axis] - value;
+        if (Math.abs(difference) < 0.0005) return targetPose[axis];
+        settling = true;
+        return value + difference * blend;
+      });
+      paint(currentPose);
+      lastFrameTime = settling ? now : 0;
+      if (settling) requestDraw();
+    }
+
+    function requestDraw() {
+      if (!frame) frame = requestAnimationFrame(draw);
+    }
+
+    function measure() {
+      var scroll = window.scrollY;
+      stops = Array.prototype.map.call(chapters, function (chapter) {
+        return chapter.getBoundingClientRect().top + scroll;
+      });
+      var mobile = window.matchMedia('(max-width: 600px)').matches;
+      var tablet = window.matchMedia('(max-width: 940px)').matches;
+      travelY = mobile ? 6 : tablet ? 8 : 12;
+      tilt = mobile ? 0.6 : 1;
+      requestDraw();
+    }
+
+    document.addEventListener('scroll', requestDraw, { passive: true });
+    window.addEventListener('resize', measure, { passive: true });
+    window.addEventListener('pageshow', measure);
+    window.addEventListener('load', measure);
+    document.addEventListener('visibilitychange', requestDraw);
+    reducedMotion.addEventListener('change', requestDraw);
+    if ('ResizeObserver' in window) {
+      var layoutObserver = new ResizeObserver(measure);
+      chapters.forEach(function (chapter) { layoutObserver.observe(chapter); });
+    }
+    measure();
+  }
+
   /* A few soft particles follow wide orbits only as the page scrolls.
      Time fades their trails without changing their positions. */
   function createPhotonField() {
@@ -267,6 +371,7 @@
   }
 
   if (chaptersWrap && chapters.length) {
+    createSensorMotion();
     var photons = createPhotonField();
     function setActive(idx) {
       var color = chapters[idx].style.getPropertyValue('--chapter-color') || '#4E2E86';
@@ -320,8 +425,7 @@
       }, { threshold: 0.05 });
       visIO.observe(chaptersWrap);
 
-      /* As soon as "Para o seu negócio" starts arriving, animate the sensor
-         upward with the final chapter instead of making it abruptly vanish. */
+      /* Fade the sensor in place as the business section arrives. */
       var clientesSection = snapReleaseSection;
       if (clientesSection && sensorPos) {
         var releaseIO = new IntersectionObserver(function (entries) {
