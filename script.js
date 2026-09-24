@@ -167,6 +167,24 @@
       if (!frame) frame = requestAnimationFrame(draw);
     }
 
+    /* On mobile/tablet the card sits stacked below the hero text instead of
+       beside it. Center it in the gap between the wordmark and the scroll
+       cue so the space above and below the card stays equal. */
+    var heroWordmark = document.querySelector('.hero__wordmark');
+    function centerSensorInGap(isMobileTablet) {
+      if (!isMobileTablet || !heroWordmark || !scrollCue) {
+        sensorPos.style.top = '';
+        sensorPos.style.bottom = '';
+        return;
+      }
+      var textBottom = heroWordmark.getBoundingClientRect().bottom;
+      var cueTop = scrollCue.getBoundingClientRect().top;
+      var sensorHeight = card.getBoundingClientRect().height;
+      var gap = cueTop - textBottom;
+      sensorPos.style.top = (textBottom + (gap - sensorHeight) / 2) + 'px';
+      sensorPos.style.bottom = 'auto';
+    }
+
     function measure() {
       var scroll = window.scrollY;
       stops = Array.prototype.map.call(chapters, function (chapter) {
@@ -176,6 +194,7 @@
       var tablet = window.matchMedia('(max-width: 940px)').matches;
       travelY = mobile ? 6 : tablet ? 8 : 12;
       tilt = mobile ? 0.6 : 1;
+      centerSensorInGap(tablet);
       requestDraw();
     }
 
