@@ -2891,9 +2891,19 @@ h1, h2, h3, h4 { font-weight: 600; }
   filter: blur(16px);
 }
 .page-hero--about {
-  background-image: linear-gradient(rgba(18,11,27,0.42) 0%, rgba(18,11,27,0.5) 22%, rgba(18,11,27,0.8) 48%, rgba(18,11,27,0.86) 100%), url('assets/sobre-capa.jpg');
+  --about-shade: linear-gradient(rgba(18,11,27,0.42) 0%, rgba(18,11,27,0.5) 22%, rgba(18,11,27,0.8) 48%, rgba(18,11,27,0.86) 100%);
+  background-image: var(--about-shade), url('assets/sobre-capa.jpg');
   background-size: cover;
   background-position: center 20%;
+}
+/* Telas largas: a foto vai para a direita e esmaece no fundo escuro, para o texto não cobrir os rostos */
+@media (min-width: 1200px) {
+  .page-hero--about {
+    background-image: var(--about-shade), linear-gradient(90deg, var(--night) 34vw, transparent 50vw), url('assets/sobre-capa.jpg');
+    background-size: auto, auto, 100vw auto;
+    background-position: 0 0, 0 0, 34vw 20%;
+    background-repeat: no-repeat;
+  }
 }
 .page-hero--about::before { display: none; }
 .page-hero--about::after { opacity: 0.7; mix-blend-mode: screen; }
