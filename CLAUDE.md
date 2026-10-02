@@ -55,7 +55,7 @@ Sempre usar as variáveis CSS existentes ao invés de hex hardcoded. Não adicio
 
 - Ao escrever ou editar CSS, sempre usar `border-radius: 0` (ou omitir a propriedade) em botões, cards, containers, imagens, inputs etc.
 - Todo `border-radius` retangular em `styles.css` já foi zerado (cards, CTAs, pills, imagens). Não reintroduzir valores como `16px`, `18px`, `20px`, `100px` etc. em componentes novos ou editados.
-- Elementos circulares (`border-radius: 50%`) foram mantidos de propósito: dot do eyebrow, dots de navegação de capítulo, dot de prova social do B2B, ícone circular do `.info-card .mark`, e o avatar circular em `sobre.html`. São indicadores redondos intencionais, não "cantos arredondados" de retângulos — na dúvida, perguntar ao usuário antes de manter ou remover formas circulares.
+- Elementos circulares (`border-radius: 50%`) foram mantidos de propósito: dot do eyebrow, dots de navegação de capítulo, dot de prova social do B2B, bolinhas dos marcos da linha do tempo em `sobre.html` (`.timeline__item::before`), ícone circular do `.info-card .mark`, e o avatar circular em `sobre.html`. São indicadores redondos intencionais, não "cantos arredondados" de retângulos — na dúvida, perguntar ao usuário antes de manter ou remover formas circulares.
 - **Exceções confirmadas pelo usuário** (mantêm curvatura do design original, não zerar):
   - Contorno do sensor na página inicial (`.sensor-float__card` em `styles.css`) — `clip-path: inset(6.25% 8.6% 8.15% 8.6% round 5%)`.
   - Quadrado central do sensor que troca de cor (`.sensor-float__color` e `.sensor-float__color::after` em `styles.css`) — `border-radius: 6%` (o `::after` usa `border-radius: inherit`).
