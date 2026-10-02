@@ -533,6 +533,161 @@
     });
   }
 
+  /* Mesmas partículas da página inicial (halo suave + rastro, nas cores do
+     sensor), mas guiadas pelo tempo em vez do scroll. Voam atrás do card do
+     simulador entre start() e stop(); depois disso somem e o desenho dorme. */
+  function createCalcPhotons() {
+    var canvas = document.getElementById('calcPhotons');
+    var ctx = canvas && canvas.getContext('2d');
+    var noop = { start: function () {}, stop: function () {} };
+    if (!ctx) return noop;
+
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var TRAIL_MS = 2200;
+    var FADE_IN_MS = 1200;
+    var FADE_OUT_MS = 800;
+
+    /* Um halo pré-renderizado por cor, igual ao da página inicial. */
+    var sprites = sensorColors.map(function (hex) {
+      var c = [1, 3, 5].map(function (i) { return parseInt(hex.slice(i, i + 2), 16); });
+      /* O fundo aqui é bem escuro: puxa as cores para o claro para o roxo e o azul não sumirem. */
+      var light = c.map(function (v) { return Math.round(v + (255 - v) * 0.55); });
+      c = c.map(function (v) { return Math.round(v + (255 - v) * 0.3); });
+      var rgba = function (ch, a) { return 'rgba(' + ch.join(',') + ',' + a + ')'; };
+      var sprite = document.createElement('canvas');
+      sprite.width = sprite.height = 64;
+      var sctx = sprite.getContext('2d');
+      var halo = sctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      halo.addColorStop(0, rgba(light, 0.65));
+      halo.addColorStop(0.28, rgba(light, 0.45));
+      halo.addColorStop(0.65, rgba(c, 0.18));
+      halo.addColorStop(1, rgba(c, 0));
+      sctx.fillStyle = halo;
+      sctx.fillRect(0, 0, 64, 64);
+      return { image: sprite, solid: rgba(c, 1), clear: rgba(c, 0) };
+    });
+
+    var particles = [];
+    var width = 0;
+    var height = 0;
+    var running = false;
+    var visible = true;
+    var frame = 0;
+    var startedAt = 0;
+    var stoppedAt = 0;
+
+    function resize() {
+      var rect = canvas.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      var ratio = Math.min(window.devicePixelRatio || 1, 1.75);
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+
+    function build() {
+      var count = width <= 600 ? 6 : 9;
+      particles = [];
+      for (var i = 0; i < count; i++) {
+        particles.push({
+          /* Elipses e oitos largos: cruzam por trás do card e reaparecem nas laterais. */
+          ax: [0.46, 0.41, 0.36][i % 3] + (i % 2) * 0.02,
+          ay: [0.46, 0.4, 0.3][i % 3],
+          fy: i % 2 ? 2 : 1,
+          phase: i * 2.39996323 + 0.4,
+          speed: (0.3 + (i % 3) * 0.06) * (i % 2 ? -1 : 1),
+          radius: 4.4 + (i % 3) * 0.9,
+          alpha: 0.75 + (i % 3) * 0.1,
+          sprite: sprites[i % sprites.length],
+          trail: []
+        });
+      }
+    }
+
+    function requestDraw() {
+      if (!frame && visible && !document.hidden) frame = requestAnimationFrame(draw);
+    }
+
+    function draw(now) {
+      frame = 0;
+      var level = running
+        ? Math.min(1, (now - startedAt) / FADE_IN_MS)
+        : Math.max(0, 1 - (now - stoppedAt) / FADE_OUT_MS);
+      ctx.clearRect(0, 0, width, height);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      var hasTrails = false;
+      particles.forEach(function (particle) {
+        var angle = particle.phase + (now - startedAt) / 1000 * particle.speed;
+        var point = {
+          x: width * (0.5 + Math.cos(angle) * particle.ax),
+          y: height * (0.5 + Math.sin(angle * particle.fy) * particle.ay)
+        };
+        var trail = particle.trail;
+        if (running) trail.push({ x: point.x, y: point.y, time: now });
+        while (trail.length && (now - trail[0].time > TRAIL_MS || trail.length > 180)) trail.shift();
+
+        if (trail.length > 1) {
+          hasTrails = true;
+          var oldest = trail[0];
+          var newest = trail[trail.length - 1];
+          var fade = Math.pow(1 - (now - newest.time) / TRAIL_MS, 1.3);
+          var tail = ctx.createLinearGradient(oldest.x, oldest.y, newest.x, newest.y);
+          tail.addColorStop(0, particle.sprite.clear);
+          tail.addColorStop(1, particle.sprite.solid);
+          ctx.beginPath();
+          ctx.moveTo(oldest.x, oldest.y);
+          trail.forEach(function (sample, index) {
+            var next = trail[index + 1] || newest;
+            ctx.quadraticCurveTo(sample.x, sample.y, (sample.x + next.x) / 2, (sample.y + next.y) / 2);
+          });
+          ctx.lineTo(newest.x, newest.y);
+          ctx.strokeStyle = tail;
+          ctx.globalAlpha = particle.alpha * fade * level * 0.16;
+          ctx.lineWidth = particle.radius * 2.4;
+          ctx.stroke();
+          ctx.globalAlpha = particle.alpha * fade * level * 0.75;
+          ctx.lineWidth = particle.radius * 0.8;
+          ctx.stroke();
+        }
+
+        if (level > 0) {
+          ctx.globalAlpha = particle.alpha * level;
+          ctx.drawImage(particle.sprite.image, point.x - particle.radius * 2.5, point.y - particle.radius * 1.9, particle.radius * 5, particle.radius * 3.8);
+        }
+      });
+      ctx.globalAlpha = 1;
+      if (running || level > 0 || hasTrails) requestDraw();
+    }
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting;
+        if (visible && running) requestDraw();
+      }).observe(canvas);
+    }
+    document.addEventListener('visibilitychange', function () { if (running) requestDraw(); });
+    window.addEventListener('resize', function () { if (running) resize(); }, { passive: true });
+
+    return {
+      start: function () {
+        if (reducedMotion.matches) return;
+        resize();
+        build();
+        running = true;
+        startedAt = performance.now();
+        requestDraw();
+      },
+      stop: function () {
+        if (!running) return;
+        running = false;
+        stoppedAt = performance.now();
+        requestDraw();
+      }
+    };
+  }
+
   /* ---------------- Simulador de economia (calculadora) ---------------- */
   var calcReais = document.getElementById('calcReais');
   var calcKg = document.getElementById('calcKg');
@@ -540,6 +695,12 @@
   var calcMeses = document.getElementById('calcMeses');
 
   if (calcReais && calcKg && calcPremium && calcMeses) {
+    var calculator = document.getElementById('calculator');
+    var calcForm = document.getElementById('calcForm');
+    var calcHint = document.getElementById('calcHint');
+    var calcSteps = document.querySelectorAll('#calcSteps li');
+    var calcProgress = document.getElementById('calcProgress');
+    var calcResultsPanel = document.getElementById('calcResults');
     var calcPremiumValue = document.getElementById('calcPremiumValue');
     var calcMesesValue = document.getElementById('calcMesesValue');
     var calcResultMeses = document.getElementById('calcResultMeses');
@@ -547,14 +708,29 @@
     var calcResultMensal = document.getElementById('calcResultMensal');
     var calcResultKg = document.getElementById('calcResultKg');
     var calcResultPremiumPct = document.getElementById('calcResultPremiumPct');
+    var calcReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var calcPhotons = createCalcPhotons();
 
     /* Premissas do produto: reduz 80% do desperdício mensal, e a carne
        premium custa em média 3x mais por quilo do que a convencional. */
     var REDUCAO_DESPERDICIO = 0.8;
     var MULTIPLICADOR_PREMIUM = 3;
 
+    /* Suspense: cada etapa fica na tela por CALC_STEP_MS antes do resultado. */
+    var CALC_STEP_MS = 650;
+    var CALC_COUNT_MS = 1800;
+
     var brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
     var kgFmt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
+
+    /* 12 meses vira "1 ano", 13 vira "1 ano e 1 mês", 24 vira "2 anos"... */
+    function calcPeriodo(m) {
+      var anos = Math.floor(m / 12);
+      var meses = m % 12;
+      var a = anos ? anos + (anos === 1 ? ' ano' : ' anos') : '';
+      var r = meses ? meses + (meses === 1 ? ' mês' : ' meses') : '';
+      return a && r ? a + ' e ' + r : a || r;
+    }
 
     /* Reduz o font-size de um número quando ele fica largo demais para o
        espaço disponível, garantindo que ele sempre apareça inteiro.
@@ -573,9 +749,13 @@
       }
     }
 
-    function calcFitAllResults() {
+    function calcFitInputs() {
       calcFitNumber(calcReais, calcReais);
       calcFitNumber(calcKg, calcKg);
+    }
+
+    function calcFitAllResults() {
+      calcFitInputs();
       calcFitNumber(calcResultTotal);
       calcFitNumber(calcResultMensal);
       calcFitNumber(calcResultKg);
@@ -589,46 +769,139 @@
       input.style.setProperty('--fill', pct + '%');
     }
 
-    function calcular() {
-      var reais = Math.max(0, Number(calcReais.value) || 0);
-      var kg = Math.max(0, Number(calcKg.value) || 0);
-      var pctPremium = Math.min(100, Math.max(0, Number(calcPremium.value) || 0));
-      var meses = Math.max(1, Number(calcMeses.value) || 1);
+    function calcLerEntradas() {
+      return {
+        reais: Math.max(0, Number(calcReais.value) || 0),
+        kg: Math.max(0, Number(calcKg.value) || 0),
+        pctPremium: Math.min(100, Math.max(0, Number(calcPremium.value) || 0)),
+        meses: Math.max(1, Number(calcMeses.value) || 1)
+      };
+    }
 
-      calcPremiumValue.textContent = pctPremium + '%';
-      calcMesesValue.textContent = meses + (meses === 1 ? ' mês' : ' meses');
-      calcResultMeses.textContent = meses;
+    /* Só atualiza o que a pessoa vê enquanto preenche; o resultado
+       aparece apenas depois de clicar em Calcular. */
+    function calcAtualizarEntradas() {
+      var e = calcLerEntradas();
+      calcPremiumValue.textContent = e.pctPremium + '%';
+      calcMesesValue.textContent = calcPeriodo(e.meses);
+      calcFillRange(calcPremium);
+      calcFillRange(calcMeses);
+      calcFitInputs();
+      calcHint.textContent = '';
+    }
 
+    function calcular(e) {
       /* Usa o valor total perdido (R$) e o total em kg, junto com o % de
          carne premium, para descobrir o preço implícito do kg convencional
          (já que o premium custa MULTIPLICADOR_PREMIUM vezes mais), e assim
          separar quanto do prejuízo mensal vem de carne premium. */
-      var kgPremium = kg * (pctPremium / 100);
-      var kgConvencional = kg - kgPremium;
+      var kgPremium = e.kg * (e.pctPremium / 100);
+      var kgConvencional = e.kg - kgPremium;
       var denom = (MULTIPLICADOR_PREMIUM * kgPremium) + kgConvencional;
-      var precoConvencional = denom > 0 ? reais / denom : 0;
+      var precoConvencional = denom > 0 ? e.reais / denom : 0;
       var valorPremiumMensal = kgPremium * precoConvencional * MULTIPLICADOR_PREMIUM;
 
-      var economiaMensal = reais * REDUCAO_DESPERDICIO;
-      var economiaKgMensal = kg * REDUCAO_DESPERDICIO;
+      var economiaMensal = e.reais * REDUCAO_DESPERDICIO;
+      var economiaKgMensal = e.kg * REDUCAO_DESPERDICIO;
       var economiaPremiumMensal = valorPremiumMensal * REDUCAO_DESPERDICIO;
 
-      var economiaTotal = economiaMensal * meses;
-      var economiaKgTotal = economiaKgMensal * meses;
-      var pctEconomiaPremium = economiaMensal > 0 ? (economiaPremiumMensal / economiaMensal) * 100 : 0;
-
-      calcResultTotal.textContent = brl.format(economiaTotal);
-      calcResultMensal.textContent = brl.format(economiaMensal);
-      calcResultKg.textContent = kgFmt.format(economiaKgTotal) + ' kg';
-      calcResultPremiumPct.textContent = Math.round(pctEconomiaPremium) + '%';
-
-      calcFillRange(calcPremium);
-      calcFillRange(calcMeses);
-      calcFitAllResults();
+      return {
+        meses: e.meses,
+        total: economiaMensal * e.meses,
+        mensal: economiaMensal,
+        kg: economiaKgMensal * e.meses,
+        premiumPct: economiaMensal > 0 ? (economiaPremiumMensal / economiaMensal) * 100 : 0
+      };
     }
 
+    /* Conta de 0 até o valor final, desacelerando no fim. */
+    function calcContar(el, ate, formato) {
+      var inicio = performance.now();
+      function passo(agora) {
+        var t = Math.min(1, (agora - inicio) / CALC_COUNT_MS);
+        el.textContent = formato(ate * (1 - Math.pow(1 - t, 3)));
+        if (t < 1) requestAnimationFrame(passo);
+      }
+      requestAnimationFrame(passo);
+    }
+
+    function calcMostrarResultado(r) {
+      var fmtTotal = function (v) { return brl.format(v); };
+      var fmtKg = function (v) { return kgFmt.format(v) + ' kg'; };
+      var fmtPct = function (v) { return Math.round(v) + '%'; };
+
+      calculator.dataset.state = 'result';
+      calcResultMeses.textContent = calcPeriodo(r.meses);
+
+      /* Mede com o número final, para o texto caber durante toda a contagem. */
+      calcResultTotal.textContent = fmtTotal(r.total);
+      calcResultMensal.textContent = fmtTotal(r.mensal);
+      calcResultKg.textContent = fmtKg(r.kg);
+      calcResultPremiumPct.textContent = fmtPct(r.premiumPct);
+      calcFitAllResults();
+
+      if (!calcReduceMotion) {
+        calcContar(calcResultTotal, r.total, fmtTotal);
+        calcContar(calcResultMensal, r.mensal, fmtTotal);
+        calcContar(calcResultKg, r.kg, fmtKg);
+        calcContar(calcResultPremiumPct, r.premiumPct, fmtPct);
+      }
+      setTimeout(function () { calcResultsPanel.focus({ preventScroll: true }); }, calcReduceMotion ? 0 : CALC_COUNT_MS);
+    }
+
+    function calcIniciar() {
+      var e = calcLerEntradas();
+      if (e.reais <= 0 || e.kg <= 0) {
+        calcHint.textContent = 'Informe as perdas em reais e em quilos para calcular.';
+        (e.reais <= 0 ? calcReais : calcKg).focus();
+        return;
+      }
+      var r = calcular(e);
+      calcPhotons.start();
+      if (calcReduceMotion) { calcMostrarResultado(r); return; }
+
+      /* Etapas com os números da própria pessoa, para parecer um cálculo feito na hora. */
+      var textos = [
+        'Lendo suas perdas: ' + brl.format(e.reais) + ' e ' + kgFmt.format(e.kg) + ' kg por mês',
+        'Separando a parcela de carne premium (' + e.pctPremium + '%)',
+        'Aplicando a leitura individual de cada peça',
+        'Projetando ' + calcPeriodo(e.meses) + ' de economia'
+      ];
+      var total = CALC_STEP_MS * calcSteps.length;
+      calcSteps.forEach(function (li, i) {
+        li.textContent = textos[i];
+        li.className = '';
+        setTimeout(function () { li.className = 'is-active'; }, i * CALC_STEP_MS);
+        setTimeout(function () { li.className = 'is-done'; }, (i + 1) * CALC_STEP_MS);
+      });
+
+      calculator.style.minHeight = calculator.offsetHeight + 'px';
+      calcProgress.style.transition = 'none';
+      calcProgress.style.width = '0';
+      calculator.dataset.state = 'loading';
+      void calcProgress.offsetWidth;
+      calcProgress.style.transition = '';
+      calcProgress.style.setProperty('--calc-dur', total + 'ms');
+      calcProgress.style.width = '100%';
+
+      setTimeout(function () { calcMostrarResultado(r); }, total + 250);
+    }
+
+    calcForm.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      calcIniciar();
+    });
+
+    document.getElementById('calcReset').addEventListener('click', function () {
+      calcPhotons.stop();
+      calculator.style.minHeight = '';
+      calculator.dataset.state = 'input';
+      calcFitInputs();
+      calcReais.focus({ preventScroll: true });
+    });
+
     [calcReais, calcKg, calcPremium, calcMeses].forEach(function (el) {
-      el.addEventListener('input', calcular);
+      el.addEventListener('input', calcAtualizarEntradas);
     });
 
     var calcResizeTimeout;
@@ -644,19 +917,6 @@
       document.fonts.ready.then(calcFitAllResults);
     }
 
-    calcular();
-  }
-
-  /* ---------------- Negócio: prioriza o tipo escolhido na home ---------------- */
-  var detalhesGrid = document.getElementById('detalhesGrid');
-  if (detalhesGrid) {
-    var tipo = new URLSearchParams(window.location.search).get('tipo');
-    if (tipo === 'acougue' || tipo === 'restaurante') {
-      var priorityCard = detalhesGrid.querySelector('[data-negocio="' + tipo + '"]');
-      if (priorityCard) {
-        detalhesGrid.insertBefore(priorityCard, detalhesGrid.firstChild);
-        priorityCard.classList.add('is-priority');
-      }
-    }
+    calcAtualizarEntradas();
   }
 })();
