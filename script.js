@@ -721,10 +721,11 @@
        premium custa em média 3x mais por quilo do que a convencional. */
     var REDUCAO_DESPERDICIO = 0.8;
     var MULTIPLICADOR_PREMIUM = 3;
-    /* Premissas dos campos opcionais (ajustáveis): a leitura visual poupa
-       metade do tempo de conferência e evita metade das devoluções. */
+    /* Premissas dos campos opcionais: 65% das devoluções e reclamações do
+       período são evitadas (dado da equipe); a leitura visual poupa metade
+       do tempo de conferência (estimativa, ajustável). */
+    var REDUCAO_DEVOLUCOES = 0.65;
     var REDUCAO_TEMPO_CONFERENCIA = 0.5;
-    var REDUCAO_DEVOLUCOES = 0.5;
     var SEMANAS_POR_MES = 52 / 12;
 
     /* Suspense: cada etapa fica na tela por CALC_STEP_MS antes do resultado. */
@@ -852,6 +853,19 @@
       requestAnimationFrame(passo);
     }
 
+    /* Escreve a frase e deixa a palavra "destacar" colorida (só textos fixos daqui). */
+    function calcMostrarNota(texto) {
+      var partes = texto.split('destacar');
+      calcResultNote.textContent = partes[0];
+      if (partes.length > 1) {
+        var destaque = document.createElement('span');
+        destaque.className = 'calculator__highlight';
+        destaque.textContent = 'destacar';
+        calcResultNote.appendChild(destaque);
+        calcResultNote.appendChild(document.createTextNode(partes.slice(1).join('destacar')));
+      }
+    }
+
     function calcMostrarResultado(r) {
       var fmtTotal = function (v) { return brl.format(v); };
       var fmtKg = function (v) { return kgFmt.format(v) + ' kg'; };
@@ -869,11 +883,11 @@
       calcResultDevolucoes.textContent = fmtTotal(r.devolucoes);
       /* A diferenciação é uma percepção, não vira número: só gera uma frase. */
       calcResultNote.hidden = !r.diferenciacao;
-      calcResultNote.textContent = !r.diferenciacao ? '' : r.diferenciacao <= 2
-        ? 'Você se vê pouco diferenciado em relação aos similares da região. O sensor pode ser um atributo visível que destaca o seu negócio.'
+      calcMostrarNota(!r.diferenciacao ? '' : r.diferenciacao <= 2
+        ? 'Você se vê pouco diferenciado em relação aos similares da região. O sensor pode ser um atributo visível para destacar o seu negócio.'
         : r.diferenciacao === 3
           ? 'Você se vê na média entre os similares da região. A leitura por cor pode ajudar a se destacar com transparência e confiança.'
-          : 'Você já se vê como um negócio diferenciado na região. O sensor reforça a transparência e a confiança que sustentam essa posição.';
+          : 'Você já se vê como um negócio diferenciado na região. O sensor reforça a transparência e a confiança que sustentam essa posição.');
       calcResultHoras.closest('.calculator__result-card').hidden = !(r.horas > 0);
       calcResultDevolucoes.closest('.calculator__result-card').hidden = !(r.devolucoes > 0);
       calcResultPremiumPct.textContent = fmtPct(r.premiumPct);

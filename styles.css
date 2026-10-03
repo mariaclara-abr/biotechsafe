@@ -2804,6 +2804,14 @@ h1, h2, h3, h4 { font-weight: 600; }
   .calculator__scale { flex-direction: row; align-items: center; justify-content: space-between; gap: 32px; }
   .calculator__scale-label { max-width: 48ch; }
 }
+.calculator__highlight {
+  font-weight: 600;
+  color: var(--c-teal);
+  background: linear-gradient(90deg, var(--c-teal), var(--c-green), var(--c-yellow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 .calculator__results-note {
   max-width: 46ch;
   margin-top: 16px;
