@@ -707,6 +707,12 @@
     var calcResultTotal = document.getElementById('calcResultTotal');
     var calcResultMensal = document.getElementById('calcResultMensal');
     var calcResultKg = document.getElementById('calcResultKg');
+    var calcResultHoras = document.getElementById('calcResultHoras');
+    var calcResultDevolucoes = document.getElementById('calcResultDevolucoes');
+    var calcHoras = document.getElementById('calcHoras');
+    var calcValorHora = document.getElementById('calcValorHora');
+    var calcDevolucoes = document.getElementById('calcDevolucoes');
+    var calcResultNote = document.getElementById('calcResultNote');
     var calcResultPremiumPct = document.getElementById('calcResultPremiumPct');
     var calcReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var calcPhotons = createCalcPhotons();
@@ -715,6 +721,11 @@
        premium custa em média 3x mais por quilo do que a convencional. */
     var REDUCAO_DESPERDICIO = 0.8;
     var MULTIPLICADOR_PREMIUM = 3;
+    /* Premissas dos campos opcionais (ajustáveis): a leitura visual poupa
+       metade do tempo de conferência e evita metade das devoluções. */
+    var REDUCAO_TEMPO_CONFERENCIA = 0.5;
+    var REDUCAO_DEVOLUCOES = 0.5;
+    var SEMANAS_POR_MES = 52 / 12;
 
     /* Suspense: cada etapa fica na tela por CALC_STEP_MS antes do resultado. */
     var CALC_STEP_MS = 650;
@@ -750,8 +761,9 @@
     }
 
     function calcFitInputs() {
-      calcFitNumber(calcReais, calcReais);
-      calcFitNumber(calcKg, calcKg);
+      [calcReais, calcKg, calcHoras, calcValorHora, calcDevolucoes].forEach(function (input) {
+        calcFitNumber(input, input);
+      });
     }
 
     function calcFitAllResults() {
@@ -759,6 +771,8 @@
       calcFitNumber(calcResultTotal);
       calcFitNumber(calcResultMensal);
       calcFitNumber(calcResultKg);
+      calcFitNumber(calcResultHoras);
+      calcFitNumber(calcResultDevolucoes);
       calcFitNumber(calcResultPremiumPct);
     }
 
@@ -773,6 +787,10 @@
       return {
         reais: Math.max(0, Number(calcReais.value) || 0),
         kg: Math.max(0, Number(calcKg.value) || 0),
+        horas: Math.max(0, Number(calcHoras.value) || 0),
+        valorHora: Math.max(0, Number(calcValorHora.value) || 0),
+        devolucoes: Math.max(0, Number(calcDevolucoes.value) || 0),
+        diferenciacao: Number((document.querySelector('input[name="calcDiferenciacao"]:checked') || {}).value) || 0,
         pctPremium: Math.min(100, Math.max(0, Number(calcPremium.value) || 0)),
         meses: Math.max(1, Number(calcMeses.value) || 1)
       };
@@ -801,15 +819,24 @@
       var precoConvencional = denom > 0 ? e.reais / denom : 0;
       var valorPremiumMensal = kgPremium * precoConvencional * MULTIPLICADOR_PREMIUM;
 
-      var economiaMensal = e.reais * REDUCAO_DESPERDICIO;
+      var economiaPerdasMensal = e.reais * REDUCAO_DESPERDICIO;
       var economiaKgMensal = e.kg * REDUCAO_DESPERDICIO;
       var economiaPremiumMensal = valorPremiumMensal * REDUCAO_DESPERDICIO;
+
+      var horasLiberadasMensal = e.horas * SEMANAS_POR_MES * REDUCAO_TEMPO_CONFERENCIA;
+      var economiaTempoMensal = horasLiberadasMensal * e.valorHora;
+      var economiaDevolucoesMensal = e.devolucoes * REDUCAO_DEVOLUCOES;
+
+      var economiaMensal = economiaPerdasMensal + economiaTempoMensal + economiaDevolucoesMensal;
 
       return {
         meses: e.meses,
         total: economiaMensal * e.meses,
         mensal: economiaMensal,
         kg: economiaKgMensal * e.meses,
+        horas: horasLiberadasMensal * e.meses,
+        devolucoes: economiaDevolucoesMensal * e.meses,
+        diferenciacao: e.diferenciacao,
         premiumPct: economiaMensal > 0 ? (economiaPremiumMensal / economiaMensal) * 100 : 0
       };
     }
@@ -828,6 +855,7 @@
     function calcMostrarResultado(r) {
       var fmtTotal = function (v) { return brl.format(v); };
       var fmtKg = function (v) { return kgFmt.format(v) + ' kg'; };
+      var fmtHoras = function (v) { return kgFmt.format(v) + ' h'; };
       var fmtPct = function (v) { return Math.round(v) + '%'; };
 
       calculator.dataset.state = 'result';
@@ -837,6 +865,17 @@
       calcResultTotal.textContent = fmtTotal(r.total);
       calcResultMensal.textContent = fmtTotal(r.mensal);
       calcResultKg.textContent = fmtKg(r.kg);
+      calcResultHoras.textContent = fmtHoras(r.horas);
+      calcResultDevolucoes.textContent = fmtTotal(r.devolucoes);
+      /* A diferenciação é uma percepção, não vira número: só gera uma frase. */
+      calcResultNote.hidden = !r.diferenciacao;
+      calcResultNote.textContent = !r.diferenciacao ? '' : r.diferenciacao <= 2
+        ? 'Você se vê pouco diferenciado em relação aos similares da região. O sensor pode ser um atributo visível que destaca o seu negócio.'
+        : r.diferenciacao === 3
+          ? 'Você se vê na média entre os similares da região. A leitura por cor pode ajudar a se destacar com transparência e confiança.'
+          : 'Você já se vê como um negócio diferenciado na região. O sensor reforça a transparência e a confiança que sustentam essa posição.';
+      calcResultHoras.closest('.calculator__result-card').hidden = !(r.horas > 0);
+      calcResultDevolucoes.closest('.calculator__result-card').hidden = !(r.devolucoes > 0);
       calcResultPremiumPct.textContent = fmtPct(r.premiumPct);
       calcFitAllResults();
 
@@ -844,18 +883,34 @@
         calcContar(calcResultTotal, r.total, fmtTotal);
         calcContar(calcResultMensal, r.mensal, fmtTotal);
         calcContar(calcResultKg, r.kg, fmtKg);
+        calcContar(calcResultHoras, r.horas, fmtHoras);
+        calcContar(calcResultDevolucoes, r.devolucoes, fmtTotal);
         calcContar(calcResultPremiumPct, r.premiumPct, fmtPct);
       }
       setTimeout(function () { calcResultsPanel.focus({ preventScroll: true }); }, calcReduceMotion ? 0 : CALC_COUNT_MS);
     }
 
-    function calcIniciar() {
+    /* Passo 1 (obrigatório) para o passo 2 (opcional). */
+    function calcProximo() {
       var e = calcLerEntradas();
       if (e.reais <= 0 || e.kg <= 0) {
-        calcHint.textContent = 'Informe as perdas em reais e em quilos para calcular.';
+        calcHint.textContent = 'Informe as perdas em reais e em quilos para continuar.';
         (e.reais <= 0 ? calcReais : calcKg).focus();
         return;
       }
+      calculator.dataset.state = 'extras';
+      calcFitInputs();
+      calcHoras.focus({ preventScroll: true });
+    }
+
+    function calcVoltar() {
+      calculator.dataset.state = 'input';
+      calcFitInputs();
+      calcReais.focus({ preventScroll: true });
+    }
+
+    function calcIniciar() {
+      var e = calcLerEntradas();
       var r = calcular(e);
       calcPhotons.start();
       if (calcReduceMotion) { calcMostrarResultado(r); return; }
@@ -864,7 +919,9 @@
       var textos = [
         'Lendo suas perdas: ' + brl.format(e.reais) + ' e ' + kgFmt.format(e.kg) + ' kg por mês',
         'Separando a parcela de carne premium (' + e.pctPremium + '%)',
-        'Aplicando a leitura individual de cada peça',
+        (e.horas > 0 || e.devolucoes > 0)
+          ? 'Somando ' + kgFmt.format(e.horas) + ' h semanais de conferência e ' + brl.format(e.devolucoes) + ' em devoluções'
+          : 'Aplicando a leitura individual de cada peça',
         'Projetando ' + calcPeriodo(e.meses) + ' de economia'
       ];
       var total = CALC_STEP_MS * calcSteps.length;
@@ -887,10 +944,13 @@
       setTimeout(function () { calcMostrarResultado(r); }, total + 250);
     }
 
+    /* Enter ou o botão avançam no passo 1 e calculam no passo 2. */
     calcForm.addEventListener('submit', function (ev) {
       ev.preventDefault();
-      calcIniciar();
+      if (calculator.dataset.state === 'input') calcProximo();
+      else calcIniciar();
     });
+    document.getElementById('calcBack').addEventListener('click', calcVoltar);
 
     document.getElementById('calcReset').addEventListener('click', function () {
       calcPhotons.stop();
@@ -900,7 +960,7 @@
       calcReais.focus({ preventScroll: true });
     });
 
-    [calcReais, calcKg, calcPremium, calcMeses].forEach(function (el) {
+    [calcReais, calcKg, calcHoras, calcValorHora, calcDevolucoes, calcPremium, calcMeses].forEach(function (el) {
       el.addEventListener('input', calcAtualizarEntradas);
     });
 

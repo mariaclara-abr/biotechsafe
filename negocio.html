@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Para o seu negócio | BioTechSafe</title>
-<meta name="description" content="Saiba pela cor se cada peça de carne ainda está boa. Reduza o descarte no seu açougue ou restaurante com o biossensor BioTechSafe e peça uma cotação.">
+<meta name="description" content="Controle de estoque, menos perdas, mais segurança e uma marca mais forte: veja como o biossensor BioTechSafe beneficia o seu açougue ou restaurante e peça uma cotação.">
 <link rel="icon" href="assets/logo.png">
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -39,10 +39,52 @@
   <div class="wrap">
     <a href="index.html" class="breadcrumb">← Voltar para a página inicial</a>
     <h1 class="reveal is-visible">Saiba o estado real de cada peça de carne, sem abrir a embalagem.</h1>
-    <p class="reveal is-visible">O biossensor da BioTechSafe muda de cor quando a carne começa a se deteriorar. Menos descarte para o seu açougue ou restaurante, mais confiança para o seu cliente.</p>
+    <p class="reveal is-visible">O biossensor da BioTechSafe muda de cor quando a carne começa a se deteriorar. Mais controle do estoque, menos perdas, mais segurança e uma marca em que o cliente confia.</p>
     <a href="#contato" class="btn btn--primary page-hero__cta">Peça uma cotação</a>
   </div>
 </header>
+
+<!-- ============ BENEFÍCIOS ============ -->
+<section class="section--pad section--dim" id="detalhes">
+  <div class="wrap">
+    <div class="negocio-detail__head">
+      <div>
+        <p class="eyebrow reveal">Por que usar o sensor?</p>
+        <h2 class="reveal">A validade informa uma data. Não informa a condição real.</h2>
+      </div>
+      <p class="negocio-detail__intro reveal reveal-delay-1">O sensor mostra, pela cor, o estado real de cada peça. Isso muda a operação, a segurança e a imagem do seu negócio, não só o descarte.</p>
+    </div>
+
+    <div class="negocio-detail__signals reveal reveal-delay-1" aria-label="Benefícios do biossensor">
+      <div class="negocio-detail__signal">
+        <span>01</span>
+        <strong>Operação sob controle</strong>
+        <ul>
+          <li><b>Controle de estoque</b><span>Identificação visual e rápida do estado real do produto.</span></li>
+          <li><b>Redução de perdas</b><span>Possibilidade de agir antes de a carne se tornar inutilizável.</span></li>
+          <li><b>Redução do risco operacional</b><span>Menor dependência de comunicação, datas e memória dos funcionários.</span></li>
+        </ul>
+      </div>
+      <div class="negocio-detail__signal">
+        <span>02</span>
+        <strong>Mais segurança</strong>
+        <ul>
+          <li><b>Segurança alimentar</b><span>Indicação baseada no estado daquela peça específica.</span></li>
+          <li><b>Segurança para o consumidor</b><span>Acompanhamento do alimento mesmo depois da compra.</span></li>
+        </ul>
+      </div>
+      <div class="negocio-detail__signal">
+        <span>03</span>
+        <strong>Marca mais forte</strong>
+        <ul>
+          <li><b>Reputação</b><span>Maior transparência e confiança no estabelecimento.</span></li>
+          <li><b>Diferenciação</b><span>Possibilidade de transformar o sensor em um atributo premium da marca.</span></li>
+          <li><b>Educação do consumidor</b><span>Sistema de cores simples para ajudar na decisão de consumo.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ============ SIMULADOR DE ECONOMIA ============ -->
 <section class="section--pad calculator-section" id="simulador">
@@ -53,7 +95,7 @@
         <h2>Simule quanto a BioTechSafe pode beneficiar o seu negócio</h2>
       </div>
       <div class="calculator-section__intro">
-        <p>Visualize o impacto de uma leitura individual e mais precisa de cada peça de carne.</p>
+        <p>Informe seus números e estime o impacto em perdas, tempo da equipe e devoluções.</p>
       </div>
     </div>
 
@@ -61,54 +103,113 @@
       <canvas class="calculator-stage__photons" id="calcPhotons" aria-hidden="true"></canvas>
     <div class="calculator reveal reveal-delay-1" id="calculator" data-state="input">
       <form class="calculator__form" id="calcForm" novalidate>
-        <div class="calculator__panel-head">
-          <span class="calculator__step">01</span>
-          <div>
-            <p class="calculator__panel-kicker">Seu cenário atual</p>
-            <h3>Informe as perdas mensais por problemas de vencimento de carnes</h3>
+        <div class="calculator__page calculator__page--1">
+          <div class="calculator__panel-head">
+            <span class="calculator__step">01</span>
+            <div>
+              <p class="calculator__panel-kicker">Passo 1 de 2 · Seu cenário atual</p>
+              <h3>Informe as perdas mensais por problemas de vencimento de carnes</h3>
+            </div>
+          </div>
+
+          <div class="calculator__row calculator__row--2">
+            <div class="calculator__field">
+              <label for="calcReais">Perda de estoque por mês, em reais</label>
+              <div class="calculator__input-prefix">
+                <span aria-hidden="true">R$</span>
+                <input type="number" id="calcReais" min="0" step="100" inputmode="decimal" value="3000">
+              </div>
+            </div>
+            <div class="calculator__field">
+              <label for="calcKg">Perda de estoque por mês, em quilos de carne</label>
+              <div class="calculator__input-prefix">
+                <span aria-hidden="true">Kg</span>
+                <input type="number" id="calcKg" min="0" step="10" inputmode="decimal" value="60">
+              </div>
+            </div>
+            <div class="calculator__field">
+              <div class="calculator__slider-field">
+                <div class="calculator__slider-head">
+                  <label for="calcPremium">Quanto dessa carne perdida é premium?</label>
+                  <span class="calculator__slider-value" id="calcPremiumValue">30%</span>
+                </div>
+                <input type="range" id="calcPremium" class="calculator__range" min="0" max="100" step="1" value="30">
+                <div class="calculator__range-meta" aria-hidden="true"><span>0%</span><span>100%</span></div>
+              </div>
+            </div>
+            <div class="calculator__field">
+              <div class="calculator__slider-field">
+                <div class="calculator__slider-head">
+                  <label for="calcMeses">Período da simulação</label>
+                  <span class="calculator__slider-value" id="calcMesesValue">1 ano</span>
+                </div>
+                <input type="range" id="calcMeses" class="calculator__range" min="1" max="60" step="1" value="12">
+                <div class="calculator__range-meta" aria-hidden="true"><span>1 mês</span><span>5 anos</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="calculator__nav">
+            <p class="calculator__hint" id="calcHint" role="alert"></p>
+            <button type="submit" class="btn btn--primary calculator__submit">Próximo <span aria-hidden="true">→</span></button>
           </div>
         </div>
 
-        <div class="calculator__row">
-          <div class="calculator__field">
-            <label for="calcReais">Perda de estoque por mês, em reais</label>
-            <div class="calculator__input-prefix">
-              <span aria-hidden="true">R$</span>
-              <input type="number" id="calcReais" min="0" step="100" inputmode="decimal" value="3000">
+        <div class="calculator__page calculator__page--2">
+          <div class="calculator__panel-head">
+            <span class="calculator__step">02</span>
+            <div>
+              <p class="calculator__panel-kicker">Passo 2 de 2 · Opcional</p>
+              <h3>Detalhe a rotina da equipe e o atendimento aos clientes</h3>
+              <p class="calculator__note">Esses números deixam a estimativa mais completa. Se preferir, deixe em branco e calcule direto.</p>
             </div>
-          </div>
-          <div class="calculator__field">
-            <label for="calcKg">Perda de estoque por mês, em quilos de carne</label>
-            <div class="calculator__input-prefix">
-              <span aria-hidden="true">Kg</span>
-              <input type="number" id="calcKg" min="0" step="10" inputmode="decimal" value="60">
-            </div>
-          </div>
-        </div>
-
-        <div class="calculator__controls">
-          <div class="calculator__slider-field">
-            <div class="calculator__slider-head">
-              <label for="calcPremium">Quanto dessa carne perdida é premium?</label>
-              <span class="calculator__slider-value" id="calcPremiumValue">30%</span>
-            </div>
-            <input type="range" id="calcPremium" class="calculator__range" min="0" max="100" step="1" value="30">
-            <div class="calculator__range-meta" aria-hidden="true"><span>0%</span><span>100%</span></div>
           </div>
 
-          <div class="calculator__slider-field">
-            <div class="calculator__slider-head">
-              <label for="calcMeses">Período da simulação</label>
-              <span class="calculator__slider-value" id="calcMesesValue">1 ano</span>
+          <div class="calculator__row calculator__row--3">
+            <div class="calculator__field">
+              <label for="calcHoras">Horas por semana conferindo validade e estoque</label>
+              <div class="calculator__input-prefix">
+                <span aria-hidden="true">h</span>
+                <input type="number" id="calcHoras" min="0" step="1" inputmode="decimal" placeholder="ex.: 6">
+              </div>
             </div>
-            <input type="range" id="calcMeses" class="calculator__range" min="1" max="60" step="1" value="12">
-            <div class="calculator__range-meta" aria-hidden="true"><span>1 mês</span><span>5 anos</span></div>
+            <div class="calculator__field">
+              <label for="calcValorHora">Valor da hora de quem faz essa conferência</label>
+              <div class="calculator__input-prefix">
+                <span aria-hidden="true">R$</span>
+                <input type="number" id="calcValorHora" min="0" step="5" inputmode="decimal" placeholder="ex.: 25">
+              </div>
+            </div>
+            <div class="calculator__field">
+              <label for="calcDevolucoes">Devoluções e reclamações por mês, em reais</label>
+              <div class="calculator__input-prefix">
+                <span aria-hidden="true">R$</span>
+                <input type="number" id="calcDevolucoes" min="0" step="100" inputmode="decimal" placeholder="ex.: 500">
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="calculator__actions">
-          <button type="submit" class="btn btn--primary calculator__submit">Calcular</button>
-          <p class="calculator__hint" id="calcHint" role="alert"></p>
+          <div class="calculator__row calculator__row--1">
+            <div class="calculator__field calculator__scale" role="radiogroup" aria-labelledby="calcDifLabel">
+              <p class="calculator__scale-label" id="calcDifLabel">O quanto você sente que seu negócio é diferenciado em relação a similares na mesma região?</p>
+              <div class="calculator__scale-body">
+                <span class="calculator__scale-end" aria-hidden="true">Pouco</span>
+                <div class="calculator__scale-options">
+              <label><input type="radio" name="calcDiferenciacao" value="1"><span>1</span></label>
+              <label><input type="radio" name="calcDiferenciacao" value="2"><span>2</span></label>
+              <label><input type="radio" name="calcDiferenciacao" value="3"><span>3</span></label>
+              <label><input type="radio" name="calcDiferenciacao" value="4"><span>4</span></label>
+              <label><input type="radio" name="calcDiferenciacao" value="5"><span>5</span></label>
+                </div>
+                <span class="calculator__scale-end" aria-hidden="true">Muito</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="calculator__nav">
+            <button type="button" class="calculator__back" id="calcBack"><span aria-hidden="true">←</span> Voltar</button>
+            <button type="submit" class="btn btn--primary calculator__submit">Calcular</button>
+          </div>
         </div>
       </form>
 
@@ -122,14 +223,16 @@
 
       <div class="calculator__results" id="calcResults" tabindex="-1">
         <div class="calculator__results-head">
-          <span class="calculator__step">02</span>
+          <span class="calculator__step">03</span>
           <span>Potencial de economia</span>
+          <button type="button" class="calculator__reset" id="calcReset">Refazer simulação</button>
         </div>
 
         <div class="calculator__results-main">
           <p class="calculator__results-label">Economia estimada em <span id="calcResultMeses">1 ano</span></p>
           <p class="calculator__results-value" id="calcResultTotal">R$ 0</p>
-          <p class="calculator__results-sub">Uma média de <span id="calcResultMensal">R$ 0</span> preservados por mês</p>
+          <p class="calculator__results-sub">Uma média de <span id="calcResultMensal">R$ 0</span> de economia por mês</p>
+          <p class="calculator__results-note" id="calcResultNote" hidden></p>
         </div>
 
         <div class="calculator__results-grid">
@@ -139,49 +242,27 @@
             <span class="calculator__result-tag">de carne podem deixar de virar prejuízo no período</span>
           </div>
           <div class="calculator__result-card">
+            <span class="calculator__result-index">Tempo da equipe</span>
+            <span class="calculator__result-num" id="calcResultHoras">0 h</span>
+            <span class="calculator__result-tag">livres da conferência manual de validade e estoque</span>
+          </div>
+          <div class="calculator__result-card">
+            <span class="calculator__result-index">Devoluções evitadas</span>
+            <span class="calculator__result-num" id="calcResultDevolucoes">R$ 0</span>
+            <span class="calculator__result-tag">em devoluções e reclamações que deixam de acontecer</span>
+          </div>
+          <div class="calculator__result-card">
             <span class="calculator__result-index">Impacto do mix premium</span>
             <span class="calculator__result-num" id="calcResultPremiumPct">0%</span>
             <span class="calculator__result-tag">da economia mensal estimada vem das carnes premium</span>
           </div>
         </div>
 
-        <a href="#contato" class="calculator__cta">Quero reduzir meu desperdício <span aria-hidden="true">↗</span></a>
-        <button type="button" class="calculator__reset" id="calcReset">Refazer simulação</button>
+        <a href="#contato" class="calculator__cta">Quero esses resultados no meu negócio <span aria-hidden="true">↗</span></a>
       </div>
     </div>
     </div>
 
-  </div>
-</section>
-
-<!-- ============ BENEFÍCIOS ============ -->
-<section class="section--pad section--dim" id="detalhes">
-  <div class="wrap">
-    <div class="negocio-detail__head">
-      <div>
-        <p class="eyebrow reveal">Por que usar o sensor?</p>
-        <h2 class="reveal">A validade informa uma data. Não informa a condição real.</h2>
-      </div>
-      <p class="negocio-detail__intro reveal reveal-delay-1">O sensor mostra, pela cor, o estado real de cada peça. Sua equipe decide antes que a perda chegue ao caixa ou ao cliente.</p>
-    </div>
-
-    <div class="negocio-detail__signals reveal reveal-delay-1" aria-label="Principais resultados para o negócio">
-      <div class="negocio-detail__signal">
-        <span>01</span>
-        <strong>Menos descarte</strong>
-        <p>Use a condição real da peça para reduzir perdas por precaução.</p>
-      </div>
-      <div class="negocio-detail__signal">
-        <span>02</span>
-        <strong>Estoque mais preciso</strong>
-        <p>Priorize o que precisa sair primeiro, sem depender apenas da etiqueta.</p>
-      </div>
-      <div class="negocio-detail__signal">
-        <span>03</span>
-        <strong>Confiança do cliente</strong>
-        <p>Mostre um controle de qualidade que o cliente entende com os próprios olhos.</p>
-      </div>
-    </div>
   </div>
 </section>
 
