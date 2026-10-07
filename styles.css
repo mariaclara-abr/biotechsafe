@@ -1282,32 +1282,37 @@ section { position: relative; }
 .negocio-detail__media {
   margin: clamp(36px, 5vw, 64px) 0 0;
 }
-.negocio-detail__media img {
-  width: 100%;
-  height: auto;
-  border-radius: 0;
+.negocio-detail__media--left {
+  width: min(100%, 1200px);
+  margin-right: auto;
+  margin-left: auto;
 }
 .negocio-detail__media figcaption {
-  padding-top: 16px;
+  margin-top: 14px;
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.6;
+  text-align: center;
   color: var(--ink-soft);
 }
 
 .negocio-detail__signals {
-  margin-top: clamp(50px, 7vw, 78px);
+  --display-photo: url("assets/acougue-premium-estoque-biotechsafe-v2.webp");
+  margin: clamp(50px, 7vw, 78px) auto 0;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  padding: 1px;
-  background: rgba(23, 26, 30, 0.14);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  padding: 0;
+  background-image: var(--display-photo);
+  background-size: cover;
+  background-position: center;
 }
 .negocio-detail__signal {
   position: relative;
   min-width: 0;
   padding: 28px clamp(22px, 3vw, 36px) 30px;
-  background: rgba(248, 246, 241, 0.88);
+  background-color: var(--paper);
+  transition: background-color 0.38s var(--ease);
 }
 .negocio-detail__signal::before {
   content: '';
@@ -1317,6 +1322,7 @@ section { position: relative; }
   width: 44px;
   height: 3px;
   background: var(--c-teal);
+  transition: opacity 0.28s var(--ease);
 }
 .negocio-detail__signal:nth-child(1)::before { background: var(--c-blue); }
 .negocio-detail__signal:nth-child(2)::before { background: var(--c-teal); }
@@ -1328,6 +1334,7 @@ section { position: relative; }
   font-size: 9px;
   letter-spacing: 0.12em;
   color: var(--ink-soft);
+  transition: opacity 0.28s var(--ease), transform 0.38s var(--ease);
 }
 .negocio-detail__signal strong {
   display: block;
@@ -1335,8 +1342,14 @@ section { position: relative; }
   font-size: clamp(1.15rem, 1.7vw, 1.5rem);
   line-height: 1.2;
   color: var(--ink);
+  transition: opacity 0.28s var(--ease), transform 0.38s var(--ease);
 }
-.negocio-detail__signal ul { margin: 18px 0 0; padding: 0; list-style: none; }
+.negocio-detail__signal ul {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  transition: opacity 0.28s var(--ease), transform 0.38s var(--ease);
+}
 .negocio-detail__signal li { padding: 14px 0; border-top: 1px solid var(--line); }
 .negocio-detail__signal li b {
   display: block;
@@ -1353,8 +1366,38 @@ section { position: relative; }
   color: var(--ink-soft);
 }
 
+.negocio-detail__signal:is(:hover, :focus-visible) {
+  background-color: transparent;
+  outline: none;
+}
+.negocio-detail__signal:is(:hover, :focus-visible)::before,
+.negocio-detail__signal:is(:hover, :focus-visible) > span,
+.negocio-detail__signal:is(:hover, :focus-visible) > strong,
+.negocio-detail__signal:is(:hover, :focus-visible) > ul {
+  opacity: 0;
+}
+.negocio-detail__signal:is(:hover, :focus-visible) > span,
+.negocio-detail__signal:is(:hover, :focus-visible) > strong,
+.negocio-detail__signal:is(:hover, :focus-visible) > ul {
+  transform: translateY(-8px);
+}
+.negocio-detail__signal:focus-visible {
+  outline: 2px solid var(--c-teal);
+  outline-offset: -3px;
+}
+
 @media (max-width: 900px) {
   .negocio-detail__signals { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .negocio-detail__signal,
+  .negocio-detail__signal::before,
+  .negocio-detail__signal > span,
+  .negocio-detail__signal > strong,
+  .negocio-detail__signal > ul {
+    transition: none;
+  }
 }
 
 @media (max-width: 600px) {
