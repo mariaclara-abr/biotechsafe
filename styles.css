@@ -1575,6 +1575,7 @@ section { position: relative; }
 }
 .page-hero__media img {
   width: 100%;
+  height: auto;
   border: 2px solid rgba(18, 11, 27, 0.9);
   border-radius: 0;
   box-shadow: 0 30px 60px -30px rgba(27, 21, 35, 0.35);
@@ -1708,6 +1709,7 @@ section { position: relative; }
 .timeline__card img {
   display: block;
   width: 100%;
+  height: auto;
   margin-top: 18px;
   aspect-ratio: 3 / 2;
   object-fit: cover;
@@ -1744,6 +1746,7 @@ section { position: relative; }
 }
 .principle-feature__media img {
   width: 100%;
+  height: auto;
   border: 2px solid rgba(18, 11, 27, 0.9);
   border-radius: 0;
   box-shadow: 0 30px 60px -30px rgba(27, 21, 35, 0.35);
@@ -3190,6 +3193,7 @@ body.page-duvidas { --page-accent: var(--c-yellow); }
 }
 .page-hero__media img {
   position: relative;
+  height: auto;
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border: 0;
