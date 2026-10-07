@@ -1279,6 +1279,22 @@ section { position: relative; }
   color: var(--ink-soft);
 }
 
+.negocio-detail__media {
+  margin: clamp(36px, 5vw, 64px) 0 0;
+}
+.negocio-detail__media img {
+  width: 100%;
+  height: auto;
+  border-radius: 0;
+}
+.negocio-detail__media figcaption {
+  padding-top: 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
 .negocio-detail__signals {
   margin-top: clamp(50px, 7vw, 78px);
   display: grid;
@@ -3080,10 +3096,13 @@ body.page-sobre { --page-accent: var(--c-teal); }
 body.page-duvidas { --page-accent: var(--c-yellow); }
 .page-hero--about__title { text-shadow: 0 2px 18px rgba(0,0,0,0.35); }
 .page-hero--about p.page-hero--about__subtitle { color: #fff; }
-@media (min-width: 601px) {
+@media (min-width: 861px) {
+  .page-hero--business .page-hero__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+  }
   .page-hero.page-hero--business h1 {
     max-width: none;
-    font-size: clamp(2rem, 4.4vw, 4rem);
+    font-size: clamp(2rem, 3.2vw, 3.2rem);
     line-height: 1;
     text-wrap: balance;
   }
@@ -3135,6 +3154,24 @@ body.page-duvidas { --page-accent: var(--c-yellow); }
   filter: saturate(0.8) contrast(1.08);
 }
 .page-hero__media .media-spec { color: rgba(255,255,255,0.45); }
+.page-hero--business .page-hero__media {
+  width: 100%;
+  max-width: 480px;
+  margin: 0;
+  justify-self: center;
+}
+.page-hero--business .page-hero__media img {
+  aspect-ratio: auto;
+  height: auto;
+  filter: none;
+}
+.page-hero--business figcaption {
+  padding-top: 24px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--paper);
+}
 .section--paper,
 .section--dim {
   background-image:
@@ -3396,6 +3433,29 @@ body.page-duvidas { --page-accent: var(--c-yellow); }
 .home-pathway:nth-child(3) { --pathway-accent: var(--c-teal); }
 .home-pathway:nth-child(4) { --pathway-accent: var(--c-green); }
 .home-pathway:nth-child(5) { --pathway-accent: var(--c-yellow); }
+/* Pulso em cadeia: cada card acende na sua vez, da esquerda para a direita */
+@keyframes pathway-pulse {
+  0%, 50%, 100% {
+    background: color-mix(in srgb, var(--paper) 5%, var(--home-background));
+    border-color: var(--line-dark);
+    border-top-color: var(--pathway-accent);
+    transform: translateY(0) scale(1);
+  }
+  25% {
+    background: color-mix(in srgb, var(--pathway-accent) 24%, var(--home-background));
+    border-color: color-mix(in srgb, var(--pathway-accent) 60%, var(--paper));
+    transform: translateY(-10px) scale(1.06);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .home-pathway { animation: pathway-pulse 3.2s ease-in-out infinite; }
+  .home-pathway:nth-child(2) { animation-delay: 0.32s; }
+  .home-pathway:nth-child(3) { animation-delay: 0.64s; }
+  .home-pathway:nth-child(4) { animation-delay: 0.96s; }
+  .home-pathway:nth-child(5) { animation-delay: 1.28s; }
+  .home-pathways__grid:hover .home-pathway,
+  .home-pathways__grid:focus-within .home-pathway { animation: none; }
+}
 .home-pathway h2 {
   max-width: 12ch;
   font-size: clamp(1rem, 1.6vw, 1.375rem);
