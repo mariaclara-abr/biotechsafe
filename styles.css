@@ -3569,3 +3569,54 @@ body.page-duvidas { --page-accent: var(--c-yellow); }
   .home-pathway:nth-child(5) { grid-column: span 1; }
   .home-pathway h2 { max-width: none; font-size: clamp(0.5rem, 2.1vw, 0.75rem); line-height: 1.15; }
 }
+
+/* Mancha de pigmento ao fundo da seção "Um pigmento natural" */
+.pigment-splash { position: relative; overflow: hidden; }
+.pigment-splash > .wrap { position: relative; }
+.pigment-splash .principle-feature { background: transparent; }
+.pigment-splash::before,
+.pigment-splash::after {
+  content: "";
+  position: absolute;
+  aspect-ratio: 1;
+  pointer-events: none;
+  -webkit-mask: url(assets/pigment-blot.png) center / contain no-repeat;
+  mask: url(assets/pigment-blot.png) center / contain no-repeat;
+}
+.pigment-splash::before {
+  --bloom: 0.3;
+  left: -15%;
+  top: 0;
+  width: min(820px, 56%);
+  background: linear-gradient(145deg, var(--c-purple), var(--c-blue));
+  opacity: 0.3;
+}
+.pigment-splash::after {
+  --bloom: 0.18;
+  left: 11%;
+  top: 34%;
+  width: min(430px, 29%);
+  background: linear-gradient(200deg, var(--c-blue), var(--c-teal));
+  opacity: 0.18;
+  --spin: 142deg;
+  transform: rotate(142deg);
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .pigment-splash::before,
+    .pigment-splash::after {
+      animation: pigment-bleed linear both;
+      animation-timeline: view();
+      animation-range: entry 15% cover 45%;
+    }
+    .pigment-splash::after { animation-range: entry 25% cover 55%; }
+  }
+}
+@keyframes pigment-bleed {
+  from { opacity: 0; transform: scale(0.82) rotate(var(--spin, 0deg)); }
+  to   { opacity: var(--bloom); transform: scale(1) rotate(var(--spin, 0deg)); }
+}
+@media (max-width: 700px) {
+  .pigment-splash::before { width: 100%; left: -18%; top: 1%; opacity: 0.26; }
+  .pigment-splash::after { width: 52%; left: 46%; top: 26%; opacity: 0.16; }
+}
