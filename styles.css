@@ -596,7 +596,7 @@ html.snap-released {
   backface-visibility: hidden;
 }
 
-/* The overlay follows only the large central swatch in sensor-card.png. */
+/* The overlay follows only the large central swatch in sensor-card.webp. */
 .sensor-float__color {
   position: absolute;
   left: 26.67%;
@@ -615,7 +615,7 @@ html.snap-released {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: url('assets/sensor-texture.png') center / cover no-repeat;
+  background: url('assets/sensor-texture.webp') center / cover no-repeat;
   mix-blend-mode: multiply;
   opacity: 0.92;
   pointer-events: none;
@@ -3106,14 +3106,14 @@ h1, h2, h3, h4 { font-weight: 600; }
 }
 .page-hero--about {
   --about-shade: linear-gradient(rgba(18,11,27,0.42) 0%, rgba(18,11,27,0.5) 22%, rgba(18,11,27,0.8) 48%, rgba(18,11,27,0.86) 100%);
-  background-image: var(--about-shade), url('assets/sobre-capa.jpg');
+  background-image: var(--about-shade), url('assets/sobre-capa.webp');
   background-size: cover;
   background-position: center 20%;
 }
 /* Telas largas: a foto vai para a direita e esmaece no fundo escuro, para o texto não cobrir os rostos */
 @media (min-width: 1200px) {
   .page-hero--about {
-    background-image: var(--about-shade), linear-gradient(90deg, var(--night) 34vw, transparent 50vw), url('assets/sobre-capa.jpg');
+    background-image: var(--about-shade), linear-gradient(90deg, var(--night) 34vw, transparent 50vw), url('assets/sobre-capa.webp');
     background-size: auto, auto, 100vw auto;
     background-position: 0 0, 0 0, 34vw 20%;
     background-repeat: no-repeat;
