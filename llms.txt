@@ -1,0 +1,13 @@
+# BioTechSafe
+
+> A BioTechSafe desenvolve embalagens inteligentes para carnes. O produto é um biossensor feito com pigmento natural de origem vegetal, colado na embalagem, que muda de cor quando a carne começa a se deteriorar. Dá para ver o estado da carne sem abrir o pacote e sem equipamento.
+
+Foco atual: carne bovina em embalagens do tipo bandeja. O biossensor complementa a data de validade e não a substitui. Fundada por Maria Clara Abrantes e Livia Del Dottore, com apoio de profissionais formados pela UFRJ e pela UFSC. Contato: contato@biotechsafe.com.br
+
+## Páginas
+
+- [Início](https://www.biotechsafe.com.br/): visão geral do biossensor e do problema que ele resolve.
+- [Como funciona](https://www.biotechsafe.com.br/como-funciona.html): a ciência por trás do pigmento que reage aos gases da carne e muda de cor.
+- [Para o seu negócio](https://www.biotechsafe.com.br/negocio.html): benefícios para açougues e restaurantes, calculadora de impacto e pedido de cotação.
+- [Nossa história](https://www.biotechsafe.com.br/sobre.html): quem somos e como a BioTechSafe nasceu.
+- [Perguntas frequentes](https://www.biotechsafe.com.br/duvidas-frequentes.html): respostas sobre funcionamento, segurança, tipos de carne e embalagens.
