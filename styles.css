@@ -1544,6 +1544,16 @@ section { position: relative; }
   flex-wrap: wrap;
   gap: 10px;
 }
+.footer__bottom a { color: inherit; text-decoration: underline; }
+.footer__bottom a:hover { color: var(--paper); }
+
+/* ---------- Política de privacidade ---------- */
+.legal { max-width: 760px; color: var(--ink-soft); line-height: 1.8; }
+.legal h2 { margin: 64px 0 20px; font-size: 1.3rem; color: var(--ink); }
+.legal p { margin: 0 0 20px; }
+.legal ul { margin: 0 0 20px; padding-left: 20px; }
+.legal li { margin-bottom: 14px; }
+.legal a { color: var(--page-accent); }
 
 /* ---------- Simple inner-page hero (used by secondary pages) ---------- */
 .page-hero {
