@@ -143,9 +143,11 @@
 </div>
 
 <div class="sensor-float-pos" id="sensorFloatPos">
-  <div class="sensor-float">
-    <img class="sensor-float__card" src="assets/sensor-card.webp" width="675" height="900" alt="Cartão do sensor BioTechSafe com escala visual de frescor da carne">
-    <div class="sensor-float__color" id="sensorFloatColor" aria-hidden="true"></div>
+  <div class="sensor-zoom" id="sensorZoom">
+    <div class="sensor-float">
+      <img class="sensor-float__card" src="assets/sensor-card.webp" width="675" height="900" alt="Cartão do sensor BioTechSafe com escala visual de frescor da carne">
+      <div class="sensor-float__color" id="sensorFloatColor" aria-hidden="true"></div>
+    </div>
   </div>
 </div>
 
@@ -160,9 +162,15 @@
 <button type="button" class="skip-intro" id="skipIntro">Pular introdução</button>
 
 <!-- ============ HOME: SENSOR PALETTE AND BUSINESS ============ -->
-<div class="home-lower">
+<div class="home-lower" id="homeLower">
 
-<nav class="home-pathways snap-after-chapters" id="clientes" aria-label="Explore a BioTechSafe">
+<div class="home-lower__curtain" id="zoomCurtain" aria-hidden="true"></div>
+
+<!-- The stage pins over the last chapter while the runway below it supplies
+     the scroll distance for the zoom into the sensor (see createSensorZoom). -->
+<div class="home-lower__stage" id="zoomStage">
+
+<nav class="home-pathways" aria-label="Explore a BioTechSafe">
   <div class="home-pathways__grid">
     <a class="home-pathway" href="como-funciona.html" aria-labelledby="pathwayScienceTitle">
       <h2 id="pathwayScienceTitle">Como funciona</h2>
@@ -192,6 +200,11 @@
   </div>
 </section>
 
+</div>
+
+<div class="home-lower__runway" id="zoomRunway" aria-hidden="true">
+  <span class="home-lower__anchor snap-after-chapters" id="clientes"></span>
+</div>
 
 </div>
 

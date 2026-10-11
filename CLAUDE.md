@@ -63,3 +63,14 @@ Sempre usar as variáveis CSS existentes ao invés de hex hardcoded. Não adicio
 ## Sem travessões
 
 **Proibido usar travessões (—, en dash –) no texto do site (títulos, parágrafos, textos alternativos, comentários de código).** Reescreva a frase usando vírgula, ponto, dois-pontos ou ponto e vírgula, ou divida em duas frases, conforme o que soar mais natural. Em `<title>`, usar `|` como separador entre o nome da página e "BioTechSafe".
+
+## Transição do sensor para os cards (página inicial)
+
+Depois do capítulo 5, a página dá zoom na fileira de quadradinhos do sensor e cinco deles viram os cards `.home-pathway`. O efeito é guiado pelo scroll e vive em `createSensorZoom` (`script.js`), no bloco `html.zoom-ready` (`styles.css`) e nos elementos `#homeLower`, `#zoomStage`, `#zoomRunway`, `#zoomCurtain` e `#sensorZoom` (`index.html`).
+
+- **Se trocar `assets/sensor-card.webp`, ou mudar a posição dos quadradinhos nela, remedir `SWATCHES` em `script.js`.** Ele guarda o centro e a cor de cada quadradinho na imagem de 675x900 px. Sem isso, os cards não ficam alinhados com os quadradinhos durante o zoom.
+- Existe uma entrada em `SWATCHES` para cada card, na mesma ordem do HTML (roxo, azul, teal, verde, amarelo). Ao adicionar ou reordenar cards, ajustar `SWATCHES` junto, senão o zoom quebra.
+- `#clientes` agora é uma âncora de 1px (`.home-lower__anchor`) no fim da pista de scroll. É o ponto de snap onde a transição termina, então não deve ser movido para outro elemento.
+- Com `prefers-reduced-motion: reduce` o efeito fica desligado (sem a classe `zoom-ready`) e o layout é o estático de sempre.
+- Os cards continuam sendo os links reais da página. Ficam escondidos só por `opacity` até se formarem, para continuarem acessíveis ao teclado e a leitores de tela.
+- As quinas dos cards seguem a regra de bordas retas. Só a foto do sensor tem os quadradinhos arredondados.

@@ -6,11 +6,11 @@
   var progressBar = document.getElementById('progressBar');
 
   /* Mandatory scroll-snap only makes sense while stepping through the
-     full-screen chapters. Once the user has landed on/inside "Para o seu
-     negócio" (the snap point right after the last chapter), it becomes a
-     trap: that section is taller than the viewport and nothing after it
-     is a snap target, so the browser keeps pulling the page back to its
-     top instead of letting the user scroll into the rest of the page. */
+     full-screen chapters. Once the user has landed on the snap point right
+     after the last chapter (#clientes, where the zoom into the sensor ends
+     on the cards screen), it becomes a trap: nothing after it is a snap
+     target, so the browser keeps pulling the page back to it instead of
+     letting the user scroll into the rest of the page. */
   var snapReleaseSection = document.getElementById('clientes');
 
   function onScroll() {
@@ -25,7 +25,9 @@
     }
 
     if (snapReleaseSection) {
-      document.documentElement.classList.toggle('snap-released', y >= snapReleaseSection.offsetTop);
+      /* The 2px margin absorbs fractional scroll offsets on high-DPI screens. */
+      var releaseY = snapReleaseSection.getBoundingClientRect().top + y;
+      document.documentElement.classList.toggle('snap-released', y >= releaseY - 2);
     }
   }
   document.addEventListener('scroll', onScroll, { passive: true });
@@ -372,8 +374,290 @@
     };
   }
 
+  /* Zoom into the sensor when the last chapter ends. The camera dives toward
+     the row of swatches on the card, five of them (same colors, same order)
+     become the home cards, and the rest of the label fades into the dark. It is
+     a pure function of scroll progress over the runway that ends at #clientes,
+     eased with the same damping as the sensor so wheel and touch steps stay
+     smooth. Under reduced motion the static layout is kept. */
+  function createSensorZoom() {
+    var home = document.getElementById('homeLower');
+    var stage = document.getElementById('zoomStage');
+    var runway = document.getElementById('zoomRunway');
+    var anchor = snapReleaseSection;
+    var zoom = document.getElementById('sensorZoom');
+    var sensor = sensorPos && sensorPos.querySelector('.sensor-float');
+    if (!home || !stage || !runway || !anchor || !zoom || !sensor) return null;
+
+    var cards = Array.prototype.slice.call(stage.querySelectorAll('.home-pathway'));
+    var business = stage.querySelector('.home-business');
+    var curtain = document.getElementById('zoomCurtain');
+    var root = document.documentElement;
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    /* Swatch centers in sensor-card.webp (675x900 px) and their flat colors, one
+       per card in order: purple, blue, teal, green, yellow. A card starts in its
+       swatch's color to take over from the photo unnoticed, then settles into its
+       site color. The image also has plum, navy and lime swatches, which just
+       fade out. Re-measure all of this if the image changes. */
+    var SWATCHES = [
+      [179, 639, '#483486'],
+      [295.5, 639.5, '#0385C0'],
+      [354.5, 639.5, '#31AEB6'],
+      [414, 639, '#59BA93'],
+      [553.5, 639, '#D7C404']
+    ];
+    var IMAGE_WIDTH = 675;
+    var SWATCH_SIZE = 44;
+    var DIVE = 0.6;       // share of the runway the camera spends zooming in
+    var STAGGER = 0.02;   // left to right delay between cards
+
+    var SPRING = 7;       // stiffness of the follow spring, in radians per second
+    var MAX_SPEED = 0.95; // fastest the zoom may advance, in runways per second
+    var FORMED = 0.9;     // every stage already sits at its end value from here on
+
+    var active = false;
+    var formed = false;
+    var rest, squares, focus, finals, maxScale, viewW, viewH, startY, endY;
+    var target = 0;
+    var shown = 0;
+    var speed = 0;
+    var frame = 0;
+    var lastTime = 0;
+
+    function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
+    function smooth(x) { x = clamp01(x); return x * x * (3 - 2 * x); }
+    function smoother(x) { x = clamp01(x); return x * x * x * (x * (x * 6 - 15) + 10); }
+
+    /* Back to the plain stylesheet state: used once the cards are formed and
+       when reduced motion switches the effect off. */
+    function clear() {
+      zoom.style.visibility = 'hidden';
+      zoom.style.willChange = '';
+      if (curtain) curtain.style.opacity = '';
+      cards.forEach(function (card) {
+        card.style.translate = '';
+        card.style.scale = '';
+        card.style.opacity = '';
+        card.style.removeProperty('--fill');
+        card.style.removeProperty('--tint');
+        card.style.removeProperty('--label');
+      });
+      if (business) {
+        business.style.opacity = '';
+        business.style.transform = '';
+        business.style.removeProperty('--business-zoom');
+      }
+    }
+
+    function paint(p) {
+      root.classList.toggle('is-diving', p > 0.03);
+      if (p >= FORMED) {
+        if (!formed) {
+          clear();
+          home.classList.add('is-formed');
+          formed = true;
+        }
+        return;
+      }
+      if (formed) {
+        home.classList.remove('is-formed');
+        formed = false;
+      }
+
+      /* Camera: exponential zoom, so it feels constant, while the swatch row
+         glides to the middle of the screen. It only eases out, and the cards
+         start leaving before it stops, so there is never a standstill. Local
+         points land at rest + translate + scale * point (the wrapper scales
+         from its corner). */
+      var dive = 1 - clamp01((p - 0.02) / DIVE);
+      var u = 1 - dive * dive;
+      var s = Math.pow(maxScale, u);
+      var fx = rest.x + focus.x + (viewW / 2 - rest.x - focus.x) * u;
+      var fy = rest.y + focus.y + (viewH / 2 - rest.y - focus.y) * u;
+      var tx = fx - rest.x - s * focus.x;
+      var ty = fy - rest.y - s * focus.y;
+      /* Exposure of the label: it dims as the camera dives, so only the swatches
+         stay lit, and is gone once the cards have left. It fades over the curtain,
+         which is already black by then, so nothing shows through. */
+      var paper = (1 - 0.7 * smooth((p - 0.05) / 0.3)) * (1 - smooth((p - 0.42) / 0.2));
+
+      if (curtain) curtain.style.opacity = smooth((p - 0.02) / 0.2).toFixed(3);
+      zoom.style.transform = 'translate3d(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px,0) scale(' + s.toFixed(4) + ')';
+      zoom.style.opacity = paper.toFixed(3);
+      zoom.style.visibility = paper > 0.002 ? '' : 'hidden';
+      zoom.style.willChange = 'transform, opacity';
+      /* Heavy blurs and filters are not worth scaling several times over. */
+      sensor.style.setProperty('--sensor-shadow-opacity', (0.44 * (1 - smooth(p / 0.18))).toFixed(3));
+      sensor.style.filter = s > 1.2 ? 'none' : '';
+
+      /* Each card starts exactly on its swatch, so it can take over from the
+         photo's soft squares, then eases to its grid slot. */
+      var appear = smooth((p - 0.12) / 0.14).toFixed(3);
+      cards.forEach(function (card, i) {
+        var q = squares[i];
+        var slot = finals[i];
+        var delay = i * STAGGER;
+        var m = smoother((p - 0.28 - delay) / 0.42);
+        var cx = rest.x + tx + s * q.x;
+        var cy = rest.y + ty + s * q.y;
+        var size = s * q.size;
+        card.style.translate = (cx + (slot.x - cx) * m - slot.x).toFixed(2) + 'px ' + (cy + (slot.y - cy) * m - slot.y).toFixed(2) + 'px';
+        card.style.scale = ((size + (slot.size - size) * m) / slot.size).toFixed(4);
+        card.style.opacity = appear;
+        card.style.setProperty('--tint', smooth((p - 0.3 - delay) / 0.3).toFixed(3));
+        card.style.setProperty('--fill', (1 - smooth((p - 0.52 - delay) / 0.2)).toFixed(3));
+        card.style.setProperty('--label', smooth((p - 0.7 - delay / 2) / 0.12).toFixed(3));
+      });
+
+      if (business) {
+        var b = smooth((p - 0.58) / 0.3);
+        business.style.opacity = b.toFixed(3);
+        business.style.transform = 'translate3d(0,' + ((1 - b) * 36).toFixed(2) + 'px,0)';
+        business.style.setProperty('--business-zoom', (1 + 0.14 * (1 - b)).toFixed(4));
+      }
+    }
+
+    function readTarget() {
+      var distance = endY - startY;
+      target = distance > 1 ? clamp01((window.scrollY - startY) / distance) : 1;
+    }
+
+    function requestFrame() {
+      if (!frame) frame = requestAnimationFrame(draw);
+    }
+
+    function draw(now) {
+      frame = 0;
+      if (!active || document.hidden) {
+        lastTime = 0;
+        return;
+      }
+      /* Critically damped spring (exact step): unlike a plain exponential ease
+         it starts from rest, so the browser's abrupt fling or snap start turns
+         into a soft ramp instead of a lurch. */
+      var elapsed = lastTime ? Math.min(now - lastTime, 64) / 1000 : 1 / 60;
+      var offset = shown - target;
+      var carry = speed + SPRING * offset;
+      var decay = Math.exp(-SPRING * elapsed);
+      speed = (speed - SPRING * carry * elapsed) * decay;
+      offset = (offset + carry * elapsed) * decay;
+      /* Cap the cruising speed: a hard fling then plays at the designed pace,
+         while slow drags still track the scroll one to one. */
+      var step = target + offset - shown;
+      if (Math.abs(step) > MAX_SPEED * elapsed) {
+        step = step < 0 ? -MAX_SPEED * elapsed : MAX_SPEED * elapsed;
+        offset = shown + step - target;
+        speed = step / elapsed;
+      }
+      if (Math.abs(offset) < 0.0004 && Math.abs(speed) < 0.004) {
+        offset = 0;
+        speed = 0;
+      }
+      shown = target + offset;
+      paint(shown);
+      var moving = offset !== 0 || speed !== 0;
+      lastTime = moving ? now : 0;
+      if (moving) requestFrame();
+    }
+
+    function onScrollZoom() {
+      if (!active) return;
+      readTarget();
+      if (target !== shown) requestFrame();
+    }
+
+    /* jump: restart from the current scroll position instead of letting the
+       spring carry on. Resize events also fire all the time on phones (the
+       address bar collapsing), so those must not interrupt a running zoom. */
+    function measure(jump) {
+      if (!active) return;
+      var box = sensorPos.getBoundingClientRect();
+      var k = sensor.offsetWidth / IMAGE_WIDTH;
+      viewW = root.clientWidth;
+      viewH = Math.min(window.innerHeight, stage.offsetHeight);
+      rest = { x: box.left, y: box.top };
+      squares = SWATCHES.map(function (c, i) {
+        if (cards[i]) cards[i].style.setProperty('--swatch', c[2]);
+        return { x: c[0] * k, y: c[1] * k, size: SWATCH_SIZE * k };
+      });
+      focus = {
+        x: squares.reduce(function (sum, q) { return sum + q.x; }, 0) / squares.length,
+        y: squares[0].y
+      };
+      /* Zoom until the five swatches span most of the screen width. */
+      var span = (SWATCHES[SWATCHES.length - 1][0] - SWATCHES[0][0] + SWATCH_SIZE) * k;
+      maxScale = Math.min(6, Math.max(2, (viewW > 700 ? 0.7 : 0.92) * viewW / span));
+      /* offset* ignores the transforms the card is wearing, so no reset needed. */
+      finals = cards.map(function (card) {
+        return {
+          x: card.offsetLeft + card.offsetWidth / 2,
+          y: card.offsetTop + card.offsetHeight / 2,
+          size: card.offsetWidth
+        };
+      });
+      /* The zoom ends with the stage's top edge at the viewport top. */
+      anchor.style.top = (runway.offsetHeight - stage.offsetHeight) + 'px';
+      var y = window.scrollY;
+      startY = home.getBoundingClientRect().top + y;
+      endY = anchor.getBoundingClientRect().top + y;
+      readTarget();
+      if (jump === true) {
+        shown = target;
+        speed = 0;
+      }
+      paint(shown);
+      if (shown !== target || speed !== 0) requestFrame();
+    }
+
+    function restart() { measure(true); }
+    function remeasure() { measure(false); }
+
+    function sync() {
+      active = !reducedMotion.matches;
+      root.classList.toggle('zoom-ready', active);
+      if (active) {
+        sensorPos.classList.remove('is-leaving');
+        restart();
+        return;
+      }
+      clear();
+      zoom.style.transform = '';
+      zoom.style.opacity = '';
+      zoom.style.visibility = '';
+      sensor.style.removeProperty('--sensor-shadow-opacity');
+      sensor.style.filter = '';
+      anchor.style.top = '';
+      home.classList.remove('is-formed');
+      root.classList.remove('is-diving');
+      formed = false;
+    }
+
+    /* Keyboard users tabbing into the cards play the zoom instead of landing
+       on cards that are still tiny or invisible. */
+    stage.addEventListener('focusin', function () {
+      if (active && window.scrollY < endY - 2) window.scrollTo(0, endY);
+    });
+
+    document.addEventListener('scroll', onScrollZoom, { passive: true });
+    window.addEventListener('resize', remeasure, { passive: true });
+    window.addEventListener('pageshow', restart);
+    window.addEventListener('load', restart);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) onScrollZoom(); });
+    reducedMotion.addEventListener('change', sync);
+    if ('ResizeObserver' in window) {
+      var zoomObserver = new ResizeObserver(remeasure);
+      zoomObserver.observe(stage);
+      chapters.forEach(function (chapter) { zoomObserver.observe(chapter); });
+    }
+    sync();
+
+    return { active: function () { return active; } };
+  }
+
   if (chaptersWrap && chapters.length) {
     createSensorMotion();
+    var zoomEngine = createSensorZoom();
     var waves = createWaveField();
     function setActive(idx) {
       var color = chapters[idx].style.getPropertyValue('--chapter-color') || '#4E2E86';
@@ -427,20 +711,22 @@
       }, { threshold: 0.05 });
       visIO.observe(chaptersWrap);
 
-      /* Fade the sensor in place as the business section arrives. */
-      var clientesSection = snapReleaseSection;
-      if (clientesSection && sensorPos) {
+      /* Reduced motion only: fade the sensor in place as the cards arrive.
+         Otherwise the zoom into the sensor owns its exit. */
+      var cardsStage = document.getElementById('zoomStage');
+      if (cardsStage && sensorPos) {
         var releaseIO = new IntersectionObserver(function (entries) {
+          if (zoomEngine && zoomEngine.active()) return;
           entries.forEach(function (entry) {
             if (entry.isIntersecting) {
               sensorPos.classList.add('is-leaving');
             } else if (entry.boundingClientRect.top >= 0) {
-              /* Scrolled back above "Para o seu negócio": bring it back. */
+              /* Scrolled back above the cards: bring it back. */
               sensorPos.classList.remove('is-leaving');
             }
           });
         }, { threshold: 0.01 });
-        releaseIO.observe(clientesSection);
+        releaseIO.observe(cardsStage);
       }
     } else {
       setActive(0);

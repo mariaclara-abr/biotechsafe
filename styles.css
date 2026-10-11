@@ -544,6 +544,10 @@ html.snap-released {
   opacity: 0;
 }
 
+/* Carries the scroll-driven zoom into the swatches (createSensorZoom). Scales
+   from its top-left corner so the math does not depend on how the card is centered. */
+.sensor-zoom { transform-origin: 0 0; }
+
 .sensor-float {
   position: relative;
   width: clamp(245px, 27vw, 390px);
@@ -3522,12 +3526,16 @@ body.page-duvidas { --page-accent: var(--c-yellow); }
   --home-text: var(--paper);
   --home-muted: color-mix(in srgb, var(--paper) 66%, var(--home-background));
   --home-edge: calc(var(--edge) + clamp(26px, 5vw, 72px));
+  color: var(--home-text);
+}
+.home-lower__stage {
   display: flex;
   flex-direction: column;
   min-height: 100svh;
   background: var(--home-background);
-  color: var(--home-text);
 }
+.home-lower__runway,
+.home-lower__curtain { display: none; }
 
 .home-business {
   isolation: isolate;
@@ -3664,6 +3672,75 @@ body.page-duvidas { --page-accent: var(--c-yellow); }
 .home-pathway:active {
   transform: translateY(0);
   background: color-mix(in srgb, var(--pathway-accent) 24%, var(--home-background));
+}
+
+/* Zoom into the sensor (script.js adds .zoom-ready, never under reduced motion).
+   The stage pins over the last chapter, above the sensor, and the runway under
+   it supplies the scroll distance. Progress is written by createSensorZoom:
+   the cards start as the sensor's swatches and the color drains up into
+   their top edge. */
+html.zoom-ready .home-lower {
+  --zoom-runway: 130svh;
+  margin-top: -100svh;
+  /* Not positioned, so it paints beneath the chapters it overlaps. */
+  background: var(--home-background);
+}
+/* Black curtain between the chapter and the sensor: what is left of the
+   chapter sinks into it while the label dissolves over it. */
+html.zoom-ready .home-lower__curtain {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+  background: var(--home-background);
+  opacity: 0;
+  pointer-events: none;
+}
+html.zoom-ready.is-diving .chapter-dots,
+html.zoom-ready.is-diving .skip-intro { opacity: 0; pointer-events: none; }
+html.zoom-ready .home-lower__stage {
+  position: sticky;
+  top: 0;
+  z-index: 61;
+  background: none;
+  pointer-events: none;
+}
+html.zoom-ready .home-lower__stage .home-pathways,
+html.zoom-ready .home-lower__stage .home-business { background: none; }
+html.zoom-ready .home-lower__runway {
+  display: block;
+  position: relative;
+  height: var(--zoom-runway);
+}
+/* One-pixel snap target where the zoom completes (JS refines top for tall stages). */
+html.zoom-ready .home-lower__anchor {
+  position: absolute;
+  left: 0;
+  top: calc(var(--zoom-runway) - 100svh);
+  width: 100%;
+  height: 1px;
+}
+html.zoom-ready .home-lower.is-formed .home-pathway { pointer-events: auto; }
+html.zoom-ready .home-lower:not(.is-formed) .home-pathway {
+  position: relative;
+  animation: none;
+  transition: none;
+  background: color-mix(in srgb, color-mix(in srgb, var(--paper) 5%, var(--home-background)) calc((1 - var(--fill, 1)) * 100%), transparent);
+}
+html.zoom-ready .home-lower:not(.is-formed) .home-pathway::before {
+  content: '';
+  position: absolute;
+  inset: -3px -1px -1px;
+  /* Starts as the sensor swatch's color, then settles into the card's own. */
+  background: color-mix(in srgb, var(--pathway-accent) calc(var(--tint, 1) * 100%), var(--swatch, var(--pathway-accent)));
+  transform: scaleY(var(--fill, 1));
+  transform-origin: 50% 0;
+}
+html.zoom-ready .home-lower:not(.is-formed) .home-pathway h2 { opacity: var(--label, 0); }
+html.zoom-ready .home-business__media { overflow: hidden; }
+html.zoom-ready .home-business__media img {
+  transform: scale(var(--business-zoom, 1));
+  transform-origin: 62% 50%;
 }
 
 @media (min-width: 701px) and (max-width: 1000px) {
