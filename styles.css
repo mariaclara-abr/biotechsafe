@@ -390,30 +390,30 @@ html.snap-released {
   isolation: isolate;
 }
 
-/* Keep the lights behind the sensor and text, inside the five chapters. */
-.chapter-photons {
+/* Keep the waves behind the sensor and text, inside the five chapters. */
+.chapter-waves {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
 }
-.chapter-photons__canvas {
+.chapter-waves__canvas {
   position: sticky;
   top: 0;
   display: block;
   width: 100%;
   height: 100svh;
-  /* Keep the reading area quiet while light gathers around the sensor. */
+  /* Keep the reading area quiet while the waves gather around the sensor. */
   mask-image: radial-gradient(ellipse 42% 38% at 28% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.12) 55%, rgba(0,0,0,0.65) 85%, #000 115%);
 }
 @media (max-width: 600px) {
-  .chapter-photons__canvas {
+  .chapter-waves__canvas {
     opacity: 0.72;
     mask-image: radial-gradient(ellipse 54% 42% at 26% 50%, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.12) 65%, #000 120%);
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .chapter-photons { display: none; }
+  .chapter-waves { display: none; }
 }
 
 /* Gives the mandatory snap a landing spot right after the last chapter,
@@ -961,6 +961,54 @@ section { position: relative; }
   .problem-section .problem__verdict { grid-template-columns: 1fr; gap: 10px; }
 }
 
+/* Bolhas de gás subindo de baixo a cima na seção "Do gás à cor".
+   --x posição, --s tamanho, --t tempo da subida, --d atraso negativo (já começam espalhadas). */
+@media (prefers-reduced-motion: no-preference) {
+  .bubbles {
+    position: absolute;
+    inset: 0;
+    container-type: size; /* habilita cqh: a altura da seção vira a distância da subida */
+    pointer-events: none;
+  }
+  .bubbles span {
+    --rise: calc(100cqh + var(--s));
+    position: absolute;
+    bottom: calc(var(--s) * -1);
+    left: var(--x);
+    width: var(--s);
+    aspect-ratio: 1;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 28%, rgba(255,255,255,0.34), rgba(255,255,255,0.06) 45%, transparent 70%);
+    animation:
+      bubble-rise var(--t) linear var(--d) infinite,
+      bubble-sway calc(var(--t) / 3) ease-in-out var(--d) infinite alternate;
+  }
+  .bubbles span:nth-child(1)  { --x: 3%;  --s: 14px; --t: 12s;   --d: -0.6s; }
+  .bubbles span:nth-child(2)  { --x: 8%;  --s: 36px; --t: 18s;   --d: -9.9s; }
+  .bubbles span:nth-child(3)  { --x: 14%; --s: 10px; --t: 9s;    --d: -2.7s; }
+  .bubbles span:nth-child(4)  { --x: 19%; --s: 22px; --t: 14s;   --d: -11.2s; }
+  .bubbles span:nth-child(5)  { --x: 25%; --s: 8px;  --t: 8s;    --d: -1.4s; }
+  .bubbles span:nth-child(6)  { --x: 30%; --s: 44px; --t: 20s;   --d: -13.6s; }
+  .bubbles span:nth-child(7)  { --x: 36%; --s: 16px; --t: 11s;   --d: -4.6s; }
+  .bubbles span:nth-child(8)  { --x: 42%; --s: 12px; --t: 10s;   --d: -9.2s; }
+  .bubbles span:nth-child(9)  { --x: 47%; --s: 26px; --t: 16s;   --d: -1.9s; }
+  .bubbles span:nth-child(10) { --x: 53%; --s: 10px; --t: 9s;    --d: -5.6s; }
+  .bubbles span:nth-child(11) { --x: 58%; --s: 18px; --t: 13s;   --d: -4.7s; }
+  .bubbles span:nth-child(12) { --x: 64%; --s: 30px; --t: 17s;   --d: -14.6s; }
+  .bubbles span:nth-child(13) { --x: 70%; --s: 12px; --t: 8.5s;  --d: -2s; }
+  .bubbles span:nth-child(14) { --x: 75%; --s: 20px; --t: 15s;   --d: -11.1s; }
+  .bubbles span:nth-child(15) { --x: 81%; --s: 9px;  --t: 10s;   --d: -4.8s; }
+  .bubbles span:nth-child(16) { --x: 86%; --s: 34px; --t: 19s;   --d: -18.6s; }
+  .bubbles span:nth-child(17) { --x: 90%; --s: 14px; --t: 12s;   --d: -1s; }
+  .bubbles span:nth-child(18) { --x: 94%; --s: 24px; --t: 14s;   --d: -8.1s; }
+}
+@keyframes bubble-rise { to { transform: translateY(calc(var(--rise) * -1)); } }
+@keyframes bubble-sway {
+  from { translate: calc(var(--s) * -0.5) 0; }
+  to   { translate: calc(var(--s) * 0.5) 0; }
+}
+
 /* ---------- Solution / how it works ---------- */
 .solution__grid {
   margin-top: 60px;
@@ -1490,6 +1538,85 @@ section { position: relative; }
   font-weight: 500;
 }
 .press-mention a:hover { color: var(--c-teal); }
+
+/* ---------- Press feature (home): tela própria sobre a matéria da EXAME ---------- */
+.press-feature {
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  min-height: 100svh;
+  padding: 96px 0;
+  background: var(--paper);
+}
+.press-feature__inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: center;
+  width: 100%;
+}
+.press-feature__photo { position: relative; margin: 0; }
+.press-feature__photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 0;
+}
+.press-feature__photo figcaption {
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+.press-feature .press-feature__cta {
+  margin-top: 40px;
+  background: var(--c-purple);
+  box-shadow: 0 8px 24px -8px rgba(78, 46, 134, 0.55);
+}
+.press-feature__logo { display: block; width: 150px; height: auto; margin: 0 0 24px; }
+.press-feature h2 {
+  font-size: clamp(1.9rem, 3.4vw, 3rem);
+  line-height: 1.1;
+  max-width: 18ch;
+}
+.press-feature__lead {
+  margin-top: 22px;
+  max-width: 44ch;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.press-feature__facts {
+  list-style: none;
+  margin: 34px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: start;
+  gap: 0 40px;
+}
+.press-feature__facts li { border-top: 2px solid var(--c-teal); padding-top: 12px; }
+.press-feature__facts li:nth-child(2) { border-color: var(--c-blue); }
+.press-feature__facts li:nth-child(3) { border-color: var(--c-purple); }
+.press-feature__facts b { display: block; font-size: 1.5rem; font-weight: 600; color: var(--ink); }
+.press-feature__facts span {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+@media (max-width: 900px) {
+  .press-feature { padding: 72px 0; }
+  .press-feature__inner { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .press-feature__facts { grid-template-columns: 1fr 1fr; gap: 20px 24px; }
+}
 
 /* ---------- Footer ---------- */
 .footer {

@@ -94,8 +94,8 @@
 
 <!-- ============ STEPPED SCROLL CHAPTERS ============ -->
 <div class="chapters" id="chapters">
-  <div class="chapter-photons" aria-hidden="true">
-    <canvas class="chapter-photons__canvas" id="chapterPhotons"></canvas>
+  <div class="chapter-waves" aria-hidden="true">
+    <canvas class="chapter-waves__canvas" id="chapterWaves"></canvas>
   </div>
 
   <section class="chapter" id="chapter-1" style="--chapter-color:#4E2E86">
@@ -193,12 +193,29 @@
 </section>
 
 
-<!-- ============ PRESS MENTION ============ -->
-<section class="press-mention" aria-labelledby="pressMentionText">
-  <p id="pressMentionText">Leia nossa matéria na <a href="https://exame.com/carreira/de-colegas-de-sala-a-socias-aos-18-anos-elas-criam-startup-com-cliente-ja-fechado/" target="_blank" rel="noopener">EXAME</a></p>
-</section>
-
 </div>
+
+<!-- ============ PRESS FEATURE ============ -->
+<section class="press-feature" aria-labelledby="pressFeatureTitle">
+  <div class="wrap press-feature__inner">
+    <figure class="press-feature__photo reveal">
+      <img src="assets/sobre-hero.webp" width="1000" height="667" loading="lazy" decoding="async" alt="As sócias Livia Del Dottore Soares e Maria Clara Pêgas Abrantes segurando os troféus de 1º lugar do Pitch Day Challenge">
+      <figcaption>1º lugar no Pitch Day Challenge</figcaption>
+    </figure>
+    <div class="reveal reveal-delay-1">
+      <p class="eyebrow">Na imprensa</p>
+      <img class="press-feature__logo" src="assets/exame-logo.webp" width="493" height="110" loading="lazy" decoding="async" alt="EXAME">
+      <h2 id="pressFeatureTitle">De colegas de sala a sócias aos 18 anos.</h2>
+      <p class="press-feature__lead">A EXAME contou como a BioTechSafe nasceu em sala de aula e já fechou o primeiro cliente.</p>
+      <ul class="press-feature__facts">
+        <li><b>1º lugar</b></li>
+        <li><b>18 anos</b></li>
+        <li><b>1º cliente</b></li>
+      </ul>
+      <a class="btn btn--primary press-feature__cta" href="https://exame.com/carreira/de-colegas-de-sala-a-socias-aos-18-anos-elas-criam-startup-com-cliente-ja-fechado/" target="_blank" rel="noopener">Leia a matéria na EXAME <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
 
 <!-- ============ FOOTER ============ -->
 <footer class="footer">

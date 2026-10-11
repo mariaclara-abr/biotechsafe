@@ -211,31 +211,44 @@
     measure();
   }
 
-  /* A few soft particles follow wide orbits only as the page scrolls.
-     Time fades their trails without changing their positions. */
-  function createPhotonField() {
-    var canvas = document.getElementById('chapterPhotons');
+  /* Magnetic-field ribbons: sheets of fine lines that twist, so the folds glow
+     where the lines bunch up. They flow only as the page scrolls and take the
+     sensor's colour, so nothing moves while the page is idle. */
+  function createWaveField() {
+    var canvas = document.getElementById('chapterWaves');
     if (!canvas || !sensorColor) return null;
     var ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
     var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    var particles = [];
     var width = 0;
     var height = 0;
     var start = 0;
     var end = 0;
     var lastScroll = window.scrollY;
     var frame = 0;
-    var orbit = 0;
+    var flow = 0;
     var colorUntil = 0;
     var color = '';
-    var lightColor = '';
-    var glow = document.createElement('canvas');
-    glow.width = glow.height = 64;
-    var glowCtx = glow.getContext('2d');
-    if (!glowCtx) return null;
-    var trailLifetime = 2600;
+    var tones = [];
+    var rim = 7;
+    var glow = '';
+    var step = 8;
+    var count = 0;
+    var shown = 3;
+    var fit = 1;
+    var gaps = [];
+    var shades = [];
+    var mid = [];
+    var half = [];
+    /* Each wave is [amplitude, cycles across the width, phase, speed]; speed is
+       radians per screen scrolled. A ribbon is its height, two swells that bend
+       it, and a twist that sets its thickness (it folds where that crosses 0). */
+    var ribbons = [
+      { y: 0.52, a: [0.15, 1.25, 0.6, 2.0], b: [0.05, 2.6, 1.7, -1.5], t: [0.17, 1.1, 1.9, 1.6] },
+      { y: 0.56, a: [0.12, 1.7, 2.4, -2.4], b: [0.06, 3.1, 0.2, 1.9], t: [0.12, 1.6, 3.7, -1.9] },
+      { y: 0.5, a: [0.1, 2.2, 4.0, 2.8], b: [0.04, 0.9, 3.3, -1.1], t: [0.09, 2.1, 6.0, 2.3] }
+    ];
 
     function requestDraw() {
       if (!frame && !reducedMotion.matches && !document.hidden) {
@@ -244,30 +257,27 @@
     }
 
     function updateColor() {
-      var nextColor = window.getComputedStyle(sensorColor).backgroundColor;
-      if (nextColor === color) return;
-      color = nextColor;
-      /* A broad, translucent body keeps the sensor hue without a white point. */
-      var channels = color.match(/[\d.]+/g).slice(0, 3);
-      lightColor = 'rgb(' + channels.map(function (channel) {
-        return Math.round(Number(channel) + (255 - Number(channel)) * 0.25);
-      }).join(',') + ')';
-      glowCtx.clearRect(0, 0, 64, 64);
-      var halo = glowCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
-      halo.addColorStop(0, lightColor.replace('rgb(', 'rgba(').replace(')', ',0.65)'));
-      halo.addColorStop(0.28, lightColor.replace('rgb(', 'rgba(').replace(')', ',0.45)'));
-      halo.addColorStop(0.65, color.replace('rgb(', 'rgba(').replace(')', ',0.18)'));
-      halo.addColorStop(1, color.replace('rgb(', 'rgba(').replace(')', ',0)'));
-      glowCtx.fillStyle = halo;
-      glowCtx.fillRect(0, 0, 64, 64);
+      var next = window.getComputedStyle(sensorColor).backgroundColor;
+      if (next === color) return;
+      color = next;
+      /* Dark sensor colours are brought up to full brightness so they still glow
+         on the night background; the rims get lighter and stronger. */
+      var channels = color.match(/[\d.]+/g).slice(0, 3).map(Number);
+      var boost = 235 / (Math.max.apply(null, channels) || 1);
+      tones = [];
+      for (var i = 0; i <= rim; i++) {
+        var lift = 0.35 * i / rim;
+        tones.push('rgba(' + channels.map(function (channel) {
+          var base = Math.min(255, channel * boost);
+          return Math.round(base + (255 - base) * lift);
+        }).join(',') + ',' + (0.14 + 0.42 * i / rim).toFixed(2) + ')');
+      }
+      /* Rim lines also get a wide, faint pass; they overlap, so it reads as a glow. */
+      glow = tones[rim].replace(/,[\d.]+\)$/, ',0.07)');
     }
 
-    function position(particle) {
-      var angle = particle.phase + orbit * particle.speed * particle.direction;
-      return {
-        x: width * (particle.x + Math.cos(angle) * particle.orbitWidth),
-        y: height * (particle.y + Math.sin(angle) * particle.orbitHeight + Math.sin(angle * 2 + particle.phase) * 0.008)
-      };
+    function sway(wave, u) {
+      return wave[0] * fit * Math.sin(Math.PI * 2 * wave[1] * fit * u + wave[2] + flow * wave[3]);
     }
 
     function resize() {
@@ -281,22 +291,19 @@
       canvas.width = Math.round(width * ratio);
       canvas.height = Math.round(height * ratio);
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-      var count = width <= 600 ? 5 : 7;
-      particles = [];
-      for (var i = 0; i < count; i++) {
-        /* Separate, shallow ellipses let the particles weave horizontally. */
-        particles.push({
-          x: 0.48 + (i % 3) * 0.055,
-          y: 0.16 + i * 0.68 / (count - 1),
-          phase: i * 2.39996323 + 0.4,
-          speed: 0.8 + (i % 3) * 0.14,
-          direction: i % 2 ? -1 : 1,
-          orbitWidth: 0.3 + (i % 2) * 0.035,
-          orbitHeight: 0.045 + (i % 3) * 0.01,
-          radius: 3.2 + (i % 3) * 0.7,
-          alpha: 0.65 + (i % 3) * 0.1,
-          trail: []
-        });
+      step = Math.max(6, width / 180);
+      count = Math.ceil(width / step) + 3;
+      shown = width <= 600 ? 2 : 3;
+      /* On tall, narrow screens, shrink amplitude and cycles so the slope stays gentle. */
+      fit = Math.sqrt(Math.min(1, width / height / 1.6));
+      var lines = width <= 600 ? 36 : 64;
+      gaps = [];
+      shades = [];
+      for (var i = 0; i < lines; i++) {
+        /* Sine spacing packs the lines at the ribbon edges, which brightens the rims. */
+        var gap = Math.sin((i / (lines - 1) - 0.5) * Math.PI);
+        gaps.push(gap);
+        shades.push(Math.round(Math.pow(Math.abs(gap), 3) * rim));
       }
       lastScroll = window.scrollY;
       requestDraw();
@@ -307,67 +314,43 @@
       var scroll = window.scrollY;
       var delta = scroll - lastScroll;
       lastScroll = scroll;
-      if (reducedMotion.matches || document.hidden || scroll >= end || scroll + height <= start) {
-        ctx.clearRect(0, 0, width, height);
-        particles.forEach(function (particle) { particle.trail = []; });
-        return;
-      }
-
-      /* No drift or inertia: the orbit advances with scroll distance alone. */
-      orbit += delta / height * 1.4;
-      updateColor();
       ctx.clearRect(0, 0, width, height);
-      ctx.lineCap = 'round';
+      if (reducedMotion.matches || document.hidden || scroll >= end || scroll + height <= start) return;
+
+      /* No drift or inertia: the flow advances with scroll distance alone. */
+      flow += delta / height;
+      updateColor();
+      ctx.lineWidth = 1;
       ctx.lineJoin = 'round';
-      var hasTrails = false;
-      particles.forEach(function (particle) {
-        var point = position(particle);
-        var trail = particle.trail;
-        if (delta !== 0) {
-          if (Math.abs(delta) > height * 0.65) trail.length = 0;
-          trail.push({ x: point.x, y: point.y, time: now });
+      for (var r = 0; r < shown; r++) {
+        var ribbon = ribbons[r];
+        for (var i = 0; i < count; i++) {
+          var u = (i - 1) * step / width;
+          mid[i] = (ribbon.y + sway(ribbon.a, u) + sway(ribbon.b, u)) * height;
+          half[i] = sway(ribbon.t, u) * height;
         }
-        while (trail.length && (now - trail[0].time > trailLifetime || trail.length > 180)) trail.shift();
-
-        var alpha = particle.alpha;
-        if (trail.length > 1) {
-          hasTrails = true;
-          var oldest = trail[0];
-          var newest = trail[trail.length - 1];
-          var fade = Math.pow(1 - (now - newest.time) / trailLifetime, 1.3);
-          var tail = ctx.createLinearGradient(oldest.x, oldest.y, point.x, point.y);
-          tail.addColorStop(0, 'transparent');
-          tail.addColorStop(1, color);
+        /* One stroke per line so overlapping lines build up toward the rim colour. */
+        for (var j = 0; j < gaps.length; j++) {
           ctx.beginPath();
-          ctx.moveTo(oldest.x, oldest.y);
-          trail.forEach(function (sample, index) {
-            var next = trail[index + 1] || point;
-            ctx.quadraticCurveTo(sample.x, sample.y, (sample.x + next.x) / 2, (sample.y + next.y) / 2);
-          });
-          ctx.lineTo(point.x, point.y);
-          ctx.strokeStyle = tail;
-          ctx.globalAlpha = alpha * fade * 0.1;
-          ctx.lineWidth = particle.radius * 2.4;
-          ctx.stroke();
-          ctx.globalAlpha = alpha * fade * 0.52;
-          ctx.lineWidth = particle.radius * 0.8;
+          ctx.moveTo(-step, mid[0] + half[0] * gaps[j]);
+          for (var k = 1; k < count; k++) ctx.lineTo((k - 1) * step, mid[k] + half[k] * gaps[j]);
+          if (shades[j] === rim) {
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = glow;
+            ctx.stroke();
+            ctx.lineWidth = 1;
+          }
+          ctx.strokeStyle = tones[shades[j]];
           ctx.stroke();
         }
-
-        var bodyWidth = particle.radius * 5;
-        var bodyHeight = particle.radius * 3.8;
-        ctx.globalAlpha = alpha;
-        ctx.drawImage(glow, point.x - bodyWidth / 2, point.y - bodyHeight / 2, bodyWidth, bodyHeight);
-      });
-      ctx.globalAlpha = 1;
-      /* After fading and the sensor transition finish, rendering sleeps. */
-      if (hasTrails || now < colorUntil) requestDraw();
+      }
+      /* Keep rendering only while the sensor colour is still blending. */
+      if (now < colorUntil) requestDraw();
     }
 
     function reset() {
       cancelAnimationFrame(frame);
       frame = 0;
-      particles.forEach(function (particle) { particle.trail = []; });
       ctx.clearRect(0, 0, width, height);
       lastScroll = window.scrollY;
       if (!reducedMotion.matches && !document.hidden) resize();
@@ -391,7 +374,7 @@
 
   if (chaptersWrap && chapters.length) {
     createSensorMotion();
-    var photons = createPhotonField();
+    var waves = createWaveField();
     function setActive(idx) {
       var color = chapters[idx].style.getPropertyValue('--chapter-color') || '#4E2E86';
       if (sensorColor) {
@@ -399,7 +382,7 @@
         /* The first state uses the original photographed purple sensor. */
         sensorColor.style.opacity = idx === 0 ? '0' : '1';
       }
-      if (photons) photons.syncColor();
+      if (waves) waves.syncColor();
       dots.forEach(function (d, i) { d.classList.toggle('is-active', i === idx); });
       if (scrollCue) scrollCue.style.opacity = idx === 0 ? '1' : '0';
     }
