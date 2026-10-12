@@ -3535,7 +3535,8 @@ body.page-duvidas { --page-accent: var(--c-yellow); }
   background: var(--home-background);
 }
 .home-lower__runway,
-.home-lower__curtain { display: none; }
+.home-lower__curtain,
+.home-lower__edge { display: none; }
 
 .home-business {
   isolation: isolate;
@@ -3695,6 +3696,28 @@ html.zoom-ready .home-lower__curtain {
   background: var(--home-background);
   opacity: 0;
   pointer-events: none;
+}
+/* Edges of the dive, drawn above the cards but under the nav: the sides blur
+   and darken while the middle stays clear. createSensorZoom sets its center,
+   clear radius and strength, and keeps it hidden while idle. The mask gives
+   both the blur and the shade their falloff. */
+html.zoom-ready .home-lower__edge {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 62;
+  pointer-events: none;
+  visibility: hidden;
+  background: color-mix(in srgb, var(--home-background) calc(var(--zoom-shade, 0) * 100%), transparent);
+  -webkit-backdrop-filter: blur(var(--zoom-blur, 0px));
+  backdrop-filter: blur(var(--zoom-blur, 0px));
+  -webkit-mask-image: radial-gradient(circle at var(--zoom-x, 50%) var(--zoom-y, 50%), transparent var(--zoom-clear, 30vmin), #000 calc(var(--zoom-clear, 30vmin) + 28vmax));
+  mask-image: radial-gradient(circle at var(--zoom-x, 50%) var(--zoom-y, 50%), transparent var(--zoom-clear, 30vmin), #000 calc(var(--zoom-clear, 30vmin) + 28vmax));
+}
+/* No blur on phones, or once frames run slow: the shade alone remains. */
+html.zoom-ready .home-lower__edge.is-flat {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 html.zoom-ready.is-diving .chapter-dots,
 html.zoom-ready.is-diving .skip-intro { opacity: 0; pointer-events: none; }

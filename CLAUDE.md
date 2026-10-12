@@ -72,5 +72,6 @@ Depois do capítulo 5, a página dá zoom na fileira de quadradinhos do sensor e
 - Existe uma entrada em `SWATCHES` para cada card, na mesma ordem do HTML (roxo, azul, teal, verde, amarelo). Ao adicionar ou reordenar cards, ajustar `SWATCHES` junto, senão o zoom quebra.
 - `#clientes` agora é uma âncora de 1px (`.home-lower__anchor`) no fim da pista de scroll. É o ponto de snap onde a transição termina, então não deve ser movido para outro elemento.
 - Com `prefers-reduced-motion: reduce` o efeito fica desligado (sem a classe `zoom-ready`) e o layout é o estático de sempre.
+- O mergulho escurece e desfoca as laterais (o miolo fica limpo), em `#zoomEdge`. A intensidade segue a velocidade real do zoom. O desfoque só roda em telas maiores e desliga sozinho se os quadros ficarem lentos, deixando só o escurecimento.
 - Os cards continuam sendo os links reais da página. Ficam escondidos só por `opacity` até se formarem, para continuarem acessíveis ao teclado e a leitores de tela.
 - As quinas dos cards seguem a regra de bordas retas. Só a foto do sensor tem os quadradinhos arredondados.

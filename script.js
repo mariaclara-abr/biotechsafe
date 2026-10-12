@@ -394,6 +394,7 @@
     var curtain = document.getElementById('zoomCurtain');
     var root = document.documentElement;
     var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var edge = document.getElementById('zoomEdge');
 
     /* Swatch centers in sensor-card.webp (675x900 px) and their flat colors, one
        per card in order: purple, blue, teal, green, yellow. A card starts in its
@@ -409,12 +410,15 @@
     ];
     var IMAGE_WIDTH = 675;
     var SWATCH_SIZE = 44;
-    var DIVE = 0.6;       // share of the runway the camera spends zooming in
-    var STAGGER = 0.02;   // left to right delay between cards
+    var DIVE = 0.43;      // share of the progress the camera spends zooming in
+    var STAGGER = 0.012;  // left to right delay between cards
+    var LEAD = 1.8;       // how far the zoom runs ahead of the scroll at the start
 
-    var SPRING = 7;       // stiffness of the follow spring, in radians per second
-    var MAX_SPEED = 0.95; // fastest the zoom may advance, in runways per second
-    var FORMED = 0.9;     // every stage already sits at its end value from here on
+    var SPRING = 10;      // stiffness of the follow spring, in radians per second
+    var DIVE_SPEED = 1;   // fastest the zoom may advance during the dive, in progress per second
+    var MAX_SPEED = 0.85; // and while the cards form, a calmer pace
+    var FORMED = 0.92;    // every stage already sits at its end value from here on
+    var FULL_RATE = 4.5;  // zoom speed (ln of the scale per second) where the speed effect peaks
 
     var active = false;
     var formed = false;
@@ -424,6 +428,13 @@
     var speed = 0;
     var frame = 0;
     var lastTime = 0;
+    var energy = 0;       // strength of the edge effect, 0 to 1
+    var lastLn = NaN;
+    var edgeOn = false;
+    var viewHeight = 0;
+    var blurMax = 0;
+    var blurSlow = 0;     // slow frames in a row while the effect was strong
+    var blurOff = false;  // the blur proved too slow here, so it stays off
 
     function clamp01(x) { return x < 0 ? 0 : x > 1 ? 1 : x; }
     function smooth(x) { x = clamp01(x); return x * x * (3 - 2 * x); }
@@ -435,6 +446,9 @@
       zoom.style.visibility = 'hidden';
       zoom.style.willChange = '';
       if (curtain) curtain.style.opacity = '';
+      energy = 0;
+      lastLn = NaN;
+      drawEdges(0, 0, 0);
       cards.forEach(function (card) {
         card.style.translate = '';
         card.style.scale = '';
@@ -450,9 +464,36 @@
       }
     }
 
-    function paint(p) {
-      root.classList.toggle('is-diving', p > 0.03);
-      if (p >= FORMED) {
+    /* Edge effect: the sides blur and darken while the middle around the swatch
+       row (cx, cy) stays clear. The clear middle closes in as the zoom speeds up
+       (level goes to 1) and opens again as it brakes. */
+    function drawEdges(level, cx, cy) {
+      if (!edge) return;
+      if (level === 0) {
+        if (edgeOn) {
+          edge.style.visibility = 'hidden';
+          edgeOn = false;
+        }
+        return;
+      }
+      if (!edgeOn) {
+        edge.style.visibility = 'visible';
+        edgeOn = true;
+      }
+      var far = Math.hypot(Math.max(cx, viewW - cx), Math.max(cy, viewHeight - cy)) * 1.05;
+      edge.style.setProperty('--zoom-x', cx.toFixed(1) + 'px');
+      edge.style.setProperty('--zoom-y', cy.toFixed(1) + 'px');
+      edge.style.setProperty('--zoom-clear', (far * (0.82 - 0.55 * level) * 0.8).toFixed(1) + 'px');
+      edge.style.setProperty('--zoom-shade', (0.45 * level).toFixed(3));
+      edge.style.setProperty('--zoom-blur', (blurMax * level).toFixed(2) + 'px');
+    }
+
+    /* v is the zoom's own progress (see readTarget), dt the seconds since the
+       last frame (0 when only re-measuring). */
+    function paint(v, dt) {
+      dt = dt || 0;
+      root.classList.toggle('is-diving', v > 0.04);
+      if (v >= FORMED) {
         if (!formed) {
           clear();
           home.classList.add('is-formed');
@@ -466,11 +507,11 @@
       }
 
       /* Camera: exponential zoom, so it feels constant, while the swatch row
-         glides to the middle of the screen. It only eases out, and the cards
-         start leaving before it stops, so there is never a standstill. Local
-         points land at rest + translate + scale * point (the wrapper scales
-         from its corner). */
-      var dive = 1 - clamp01((p - 0.02) / DIVE);
+         glides to the middle of the screen. It only eases out, so it bursts away
+         at once and brakes into the cards, which start leaving before it stops.
+         Local points land at rest + translate + scale * point (the wrapper
+         scales from its corner). */
+      var dive = 1 - clamp01(v / DIVE);
       var u = 1 - dive * dive;
       var s = Math.pow(maxScale, u);
       var fx = rest.x + focus.x + (viewW / 2 - rest.x - focus.x) * u;
@@ -480,47 +521,60 @@
       /* Exposure of the label: it dims as the camera dives, so only the swatches
          stay lit, and is gone once the cards have left. It fades over the curtain,
          which is already black by then, so nothing shows through. */
-      var paper = (1 - 0.7 * smooth((p - 0.05) / 0.3)) * (1 - smooth((p - 0.42) / 0.2));
+      var paper = (1 - 0.7 * smooth((v - 0.01) / 0.2)) * (1 - smooth((v - 0.28) / 0.16));
 
-      if (curtain) curtain.style.opacity = smooth((p - 0.02) / 0.2).toFixed(3);
+      /* The speed effect follows how fast the zoom really is: it attacks almost
+         at once and lingers a little while the camera brakes. */
+      var ln = Math.log(s);
+      var rate = dt > 0 && lastLn === lastLn ? Math.abs(ln - lastLn) / dt : 0;
+      lastLn = ln;
+      var level = clamp01(rate / FULL_RATE);
+      energy += (level - energy) * (1 - Math.exp(-dt * (level > energy ? 45 : 10)));
+      if (energy < 0.01) energy = 0;
+      drawEdges(energy, fx, fy);
+
+      if (curtain) curtain.style.opacity = smooth(v / 0.13).toFixed(3);
       zoom.style.transform = 'translate3d(' + tx.toFixed(2) + 'px,' + ty.toFixed(2) + 'px,0) scale(' + s.toFixed(4) + ')';
       zoom.style.opacity = paper.toFixed(3);
       zoom.style.visibility = paper > 0.002 ? '' : 'hidden';
       zoom.style.willChange = 'transform, opacity';
       /* Heavy blurs and filters are not worth scaling several times over. */
-      sensor.style.setProperty('--sensor-shadow-opacity', (0.44 * (1 - smooth(p / 0.18))).toFixed(3));
+      sensor.style.setProperty('--sensor-shadow-opacity', (0.44 * (1 - smooth(v / 0.1))).toFixed(3));
       sensor.style.filter = s > 1.2 ? 'none' : '';
 
       /* Each card starts exactly on its swatch, so it can take over from the
          photo's soft squares, then eases to its grid slot. */
-      var appear = smooth((p - 0.12) / 0.14).toFixed(3);
+      var appear = smooth((v - 0.03) / 0.09).toFixed(3);
       cards.forEach(function (card, i) {
         var q = squares[i];
         var slot = finals[i];
         var delay = i * STAGGER;
-        var m = smoother((p - 0.28 - delay) / 0.42);
+        var m = smoother((v - 0.2 - delay) / 0.56);
         var cx = rest.x + tx + s * q.x;
         var cy = rest.y + ty + s * q.y;
         var size = s * q.size;
         card.style.translate = (cx + (slot.x - cx) * m - slot.x).toFixed(2) + 'px ' + (cy + (slot.y - cy) * m - slot.y).toFixed(2) + 'px';
         card.style.scale = ((size + (slot.size - size) * m) / slot.size).toFixed(4);
         card.style.opacity = appear;
-        card.style.setProperty('--tint', smooth((p - 0.3 - delay) / 0.3).toFixed(3));
-        card.style.setProperty('--fill', (1 - smooth((p - 0.52 - delay) / 0.2)).toFixed(3));
-        card.style.setProperty('--label', smooth((p - 0.7 - delay / 2) / 0.12).toFixed(3));
+        card.style.setProperty('--tint', smooth((v - 0.2 - delay) / 0.3).toFixed(3));
+        card.style.setProperty('--fill', (1 - smooth((v - 0.5 - delay) / 0.22)).toFixed(3));
+        card.style.setProperty('--label', smooth((v - 0.7 - delay / 2) / 0.14).toFixed(3));
       });
 
       if (business) {
-        var b = smooth((p - 0.58) / 0.3);
+        var b = smooth((v - 0.44) / 0.46);
         business.style.opacity = b.toFixed(3);
         business.style.transform = 'translate3d(0,' + ((1 - b) * 36).toFixed(2) + 'px,0)';
         business.style.setProperty('--business-zoom', (1 + 0.14 * (1 - b)).toFixed(4));
       }
     }
 
+    /* The target is the zoom's own progress, not the scroll's: the first stretch
+       of scroll does most of the zooming, so it starts the instant the page moves. */
     function readTarget() {
       var distance = endY - startY;
-      target = distance > 1 ? clamp01((window.scrollY - startY) / distance) : 1;
+      var scrolled = distance > 1 ? clamp01((window.scrollY - startY) / distance) : 1;
+      target = 1 - Math.pow(1 - scrolled, LEAD);
     }
 
     function requestFrame() {
@@ -536,17 +590,19 @@
       /* Critically damped spring (exact step): unlike a plain exponential ease
          it starts from rest, so the browser's abrupt fling or snap start turns
          into a soft ramp instead of a lurch. */
-      var elapsed = lastTime ? Math.min(now - lastTime, 64) / 1000 : 1 / 60;
+      var elapsed = lastTime ? Math.min(now - lastTime, 100) / 1000 : 1 / 60;
       var offset = shown - target;
       var carry = speed + SPRING * offset;
       var decay = Math.exp(-SPRING * elapsed);
       speed = (speed - SPRING * carry * elapsed) * decay;
       offset = (offset + carry * elapsed) * decay;
       /* Cap the cruising speed: a hard fling then plays at the designed pace,
-         while slow drags still track the scroll one to one. */
+         while slow drags still track the scroll one to one. The cap eases from
+         the dive's pace to the calmer one as the camera brakes. */
+      var cap = MAX_SPEED + (DIVE_SPEED - MAX_SPEED) * (1 - smooth((shown - 0.22) / 0.18));
       var step = target + offset - shown;
-      if (Math.abs(step) > MAX_SPEED * elapsed) {
-        step = step < 0 ? -MAX_SPEED * elapsed : MAX_SPEED * elapsed;
+      if (Math.abs(step) > cap * elapsed) {
+        step = step < 0 ? -cap * elapsed : cap * elapsed;
         offset = shown + step - target;
         speed = step / elapsed;
       }
@@ -555,8 +611,18 @@
         speed = 0;
       }
       shown = target + offset;
-      paint(shown);
-      var moving = offset !== 0 || speed !== 0;
+      /* The blur is the costly part of the edge effect: if frames turn slow
+         while it is strong, give it up for good and keep the shade. */
+      if (blurMax && energy > 0.2) {
+        blurSlow = elapsed > 0.026 ? blurSlow + 1 : 0;
+        if (blurSlow >= 4) {
+          blurMax = 0;
+          blurOff = true;
+          edge.classList.add('is-flat');
+        }
+      }
+      paint(shown, elapsed);
+      var moving = offset !== 0 || speed !== 0 || energy > 0;
       lastTime = moving ? now : 0;
       if (moving) requestFrame();
     }
@@ -601,12 +667,17 @@
       var y = window.scrollY;
       startY = home.getBoundingClientRect().top + y;
       endY = anchor.getBoundingClientRect().top + y;
+      /* Phones skip the blur, which is the costly part of the edge effect. */
+      viewHeight = window.innerHeight;
+      blurMax = edge && !blurOff && viewW > 700 && window.CSS && CSS.supports &&
+        (CSS.supports('backdrop-filter', 'blur(1px)') || CSS.supports('-webkit-backdrop-filter', 'blur(1px)')) ? 7 : 0;
+      if (edge) edge.classList.toggle('is-flat', !blurMax);
       readTarget();
       if (jump === true) {
         shown = target;
         speed = 0;
       }
-      paint(shown);
+      paint(shown, 0);
       if (shown !== target || speed !== 0) requestFrame();
     }
 
