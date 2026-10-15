@@ -2044,12 +2044,12 @@ section { position: relative; }
   height: 100%;
   backface-visibility: hidden;
 }
-/* mesmo recorte do sensor da home: tira o fundo branco da foto e segue o contorno do cartão */
+/* o recorte do cartão (mesmo contorno do sensor da home) já vem embutido na imagem, com alfa:
+   clip-path em elemento girando em 3D é caro e trava, principalmente no Safari */
 .timeline-sensor__front {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  clip-path: inset(6.25% 8.6% 8.15% 8.6% round 5%);
 }
 .timeline-sensor__back {
   transform: rotateY(180deg);
@@ -2058,8 +2058,7 @@ section { position: relative; }
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--paper);
-  clip-path: inset(6.25% 8.6% 8.15% 8.6% round 5%);
+  background: url('assets/sensor-card-back.webp') center / 100% 100% no-repeat;
 }
 
 .timeline-field.is-live .timeline-sensor__spin { opacity: 0; }
