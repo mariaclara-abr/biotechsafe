@@ -1398,7 +1398,12 @@
       });
       tlField.style.setProperty('--p', p.toFixed(4));
       if (r.top < vh * 0.8) tlField.classList.add('is-burst');
-      if (p >= 0.995) tlField.classList.add('is-unlocked');
+      if (p >= 0.995) {
+        // sensor liberado: o campo já está todo desenhado, então para de reagir ao scroll e deixa o giro livre
+        tlField.style.setProperty('--p', 1);
+        tlField.classList.add('is-unlocked');
+        window.removeEventListener('scroll', tlRequest);
+      }
     }
 
     function tlRequest() {
