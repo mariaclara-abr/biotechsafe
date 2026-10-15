@@ -1755,24 +1755,128 @@ section { position: relative; }
   .section--origem .content-block { display: block; }
 }
 
-/* ---------- Timeline (Nossa história) ---------- */
+/* ---------- Timeline (Nossa história) ----------
+   Explosão no topo, raios que descem com o scroll (script.js) e
+   convergem no sensor, que gira em 3D ao ser "desbloqueado". */
+.timeline-section {
+  overflow: hidden;
+  background: radial-gradient(ellipse 80% 40% at 50% 0%, var(--night-2), var(--night));
+}
 .timeline-section .content-block { margin: 0 auto; text-align: center; }
 .timeline-section .eyebrow { justify-content: center; }
+.timeline-section h2 { color: #fff; }
+.timeline-section .content-block { position: relative; z-index: 1; }
+
+.timeline-field {
+  --p: 1; /* progresso do scroll (0 a 1), atualizado pelo script.js */
+  --sensor-w: clamp(220px, 24vw, 280px);
+  --sensor-h: calc(var(--sensor-w) * 4 / 3);
+  position: relative;
+  max-width: 1000px;
+  margin: 150px auto 0;
+}
+
+/* raios: campo de linhas entre a explosão (topo) e o sensor (base) */
+.timeline-field__rays {
+  position: absolute;
+  top: 0;
+  left: -15%;
+  width: 130%;
+  height: calc(100% - var(--sensor-h) / 2);
+  overflow: visible;
+  pointer-events: none;
+  mix-blend-mode: screen; /* onde os raios se cruzam, o brilho soma */
+}
+.timeline-field__rays path {
+  fill: none;
+  stroke: url(#tlRayGrad);
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--p));
+}
+
+/* raio principal, onde ficam os marcos */
+.timeline-field__spine {
+  position: absolute;
+  top: 0;
+  bottom: calc(var(--sensor-h) / 2);
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  pointer-events: none;
+}
+.timeline-field__spine::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--c-purple), var(--c-blue), var(--c-teal), var(--c-green), var(--c-yellow));
+  clip-path: inset(0 0 calc((1 - var(--p)) * 100%) 0);
+}
+.timeline-field__spine::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--p) * 100%);
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 14px 5px var(--c-teal), 0 0 40px 12px var(--c-blue);
+}
+
+/* explosão inicial */
+.timeline-field__burst {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(560px, 120vw);
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+.timeline-field__burst::before {
+  content: '';
+  position: absolute;
+  inset: 10%;
+  background: radial-gradient(closest-side, #fff 0, #fff 5%, color-mix(in srgb, var(--c-blue) 75%, transparent) 24%, color-mix(in srgb, var(--c-purple) 40%, transparent) 55%, transparent);
+  scale: 0;
+  opacity: 0;
+}
+.timeline-field__burst svg {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  scale: 0;
+  opacity: 0;
+}
+.timeline-field__burst line { stroke-width: 1.1; stroke-linecap: round; }
+.timeline-field.is-burst .timeline-field__burst::before {
+  animation: tl-flash 1.2s var(--ease) forwards, tl-pulse 4s ease-in-out 1.2s infinite alternate;
+}
+.timeline-field.is-burst .timeline-field__burst svg {
+  animation: tl-shoot 1.6s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+}
+@keyframes tl-flash {
+  0%   { scale: 0; opacity: 0; }
+  20%  { scale: 1.6; opacity: 1; }
+  100% { scale: 1; opacity: 0.75; }
+}
+@keyframes tl-pulse {
+  from { scale: 1; opacity: 0.75; }
+  to   { scale: 1.08; opacity: 0.95; }
+}
+@keyframes tl-shoot {
+  0%   { scale: 0.05; opacity: 1; rotate: 0deg; }
+  100% { scale: 1; opacity: 0.6; rotate: 10deg; }
+}
+
 .timeline {
   --gutter: 56px;
   position: relative;
+  z-index: 1;
   list-style: none;
-  max-width: 1000px;
-  margin: 72px auto 0;
-  padding: 0;
-}
-.timeline::before {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 50%;
-  width: 2px;
-  margin-left: -1px;
-  background: linear-gradient(180deg, var(--c-purple), var(--c-blue), var(--c-teal), var(--c-green), var(--c-yellow));
+  margin: 0;
+  padding: 72px 0 0;
 }
 .timeline__item {
   position: relative;
@@ -1790,7 +1894,7 @@ section { position: relative; }
 .timeline__item:nth-child(7) { --dot: var(--c-green); }
 .timeline__item:nth-child(8) { --dot: var(--c-yellow); }
 
-/* marco: bolinha sobre a linha + traço até o card */
+/* marco: bolinha sobre o raio + traço até o card */
 .timeline__item::before {
   content: '';
   position: absolute;
@@ -1801,7 +1905,7 @@ section { position: relative; }
   height: 16px;
   border-radius: 50%;
   background: var(--dot);
-  box-shadow: 0 0 0 5px var(--paper-dim);
+  box-shadow: 0 0 0 5px var(--night), 0 0 18px 3px var(--dot);
 }
 .timeline__item::after {
   content: '';
@@ -1811,9 +1915,28 @@ section { position: relative; }
   width: var(--gutter);
   height: 2px;
   background: var(--dot);
+  transform-origin: right center;
 }
 .timeline__item:nth-child(even)::before { right: auto; left: -8px; }
-.timeline__item:nth-child(even)::after { right: auto; left: 0; }
+.timeline__item:nth-child(even)::after { right: auto; left: 0; transform-origin: left center; }
+
+/* com JS: o marco só acende quando a ponta do raio chega nele */
+.timeline-field.is-live .timeline__item {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+.timeline-field.is-live .timeline__item::before {
+  transform: scale(0);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s;
+}
+.timeline-field.is-live .timeline__item::after {
+  transform: scaleX(0);
+  transition: transform 0.5s var(--ease) 0.25s;
+}
+.timeline-field.is-live .timeline__item.is-lit { opacity: 1; transform: none; }
+.timeline-field.is-live .timeline__item.is-lit::before { transform: scale(1); }
+.timeline-field.is-live .timeline__item.is-lit::after { transform: scaleX(1); }
 
 /* data fica do lado oposto ao card */
 .timeline__date {
@@ -1826,27 +1949,28 @@ section { position: relative; }
   letter-spacing: 0.12em;
   text-transform: uppercase;
   white-space: nowrap;
-  color: var(--ink);
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 0 0 8px var(--night), 0 0 2px var(--night);
 }
 .timeline__item:nth-child(even) .timeline__date { left: auto; right: calc(100% + 36px); }
 
 .timeline__card {
   padding: 24px 28px;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid var(--line);
+  background: rgba(18, 11, 27, 0.84);
+  border: 1px solid var(--line-dark);
   text-align: left;
 }
 .timeline__card p {
   font-size: clamp(1rem, 1.6vw, 1.15rem);
   font-weight: 500;
   line-height: 1.5;
-  color: var(--ink);
+  color: #fff;
 }
 .timeline__card a {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.timeline__card a:hover { color: var(--page-accent); }
+.timeline__card a:hover { color: var(--c-teal); }
 .timeline__card img {
   display: block;
   width: 100%;
@@ -1857,21 +1981,132 @@ section { position: relative; }
   object-position: center 60%;
 }
 
+/* sensor no fim dos raios: gira em 3D ao ser desbloqueado e fica flutuando */
+.timeline-sensor {
+  position: relative;
+  z-index: 1;
+  width: var(--sensor-w);
+  height: var(--sensor-h);
+  margin: 96px auto 0;
+}
+.timeline-sensor::before {
+  content: '';
+  position: absolute;
+  inset: -60% -80%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--c-blue) 60%, transparent), color-mix(in srgb, var(--c-teal) 20%, transparent) 50%, transparent);
+  opacity: 0.35;
+  scale: 0.45;
+  pointer-events: none;
+}
+.timeline-sensor::after {
+  content: '';
+  position: absolute;
+  inset: 6.25% 8.6% 8.15%;
+  border: 1px solid var(--c-teal);
+  opacity: 0;
+  pointer-events: none;
+}
+.timeline-follow {
+  position: relative;
+  z-index: 1;
+  margin: 56px 0 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.8);
+}
+.timeline-follow a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.timeline-follow a:hover { color: var(--c-teal); }
+.timeline-sensor__float {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 900px;
+}
+.timeline-sensor__spin {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.timeline-sensor__face,
+.timeline-sensor__back {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+/* mesmo recorte do sensor da home: tira o fundo branco da foto e segue o contorno do cartão */
+.timeline-sensor__front {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  clip-path: inset(6.25% 8.6% 8.15% 8.6% round 5%);
+}
+.timeline-sensor__back {
+  transform: rotateY(180deg);
+}
+.timeline-sensor__back::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  clip-path: inset(6.25% 8.6% 8.15% 8.6% round 5%);
+}
+
+.timeline-field.is-live .timeline-sensor__spin { opacity: 0; }
+.timeline-field.is-unlocked .timeline-sensor__spin {
+  animation: tl-unlock 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.timeline-field.is-unlocked .timeline-sensor__float {
+  animation: tl-float 5s ease-in-out 1.8s infinite alternate;
+}
+.timeline-field.is-unlocked .timeline-sensor::before { animation: tl-halo 2s var(--ease) forwards; }
+.timeline-field.is-unlocked .timeline-sensor::after { animation: tl-ring 1.2s ease-out 0.9s forwards; }
+@keyframes tl-unlock {
+  0%   { transform: rotateY(0) scale(0.3); opacity: 0; }
+  10%  { opacity: 1; }
+  100% { transform: rotateY(1080deg) scale(1); opacity: 1; }
+}
+@keyframes tl-float {
+  from { transform: translateY(-8px) rotate(-0.8deg); }
+  to   { transform: translateY(8px) rotate(0.8deg); }
+}
+@keyframes tl-halo {
+  0%   { opacity: 0.35; scale: 0.45; }
+  30%  { opacity: 1; scale: 1.2; }
+  100% { opacity: 0.75; scale: 1; }
+}
+@keyframes tl-ring {
+  0%   { opacity: 0.9; scale: 1; }
+  100% { opacity: 0; scale: 1.9; }
+}
+
 @media (max-width: 800px) {
-  .timeline { margin-top: 48px; }
-  .timeline::before { left: 8px; }
+  .timeline-field { margin-top: 96px; }
+  .timeline { padding-top: 56px; }
+  /* mobile: cards empilhados no centro, marco no topo de cada um, sobre o raio */
   .timeline__item,
-  .timeline__item:nth-child(even) { width: 100%; margin-left: 0; padding: 0 0 40px 40px; }
+  .timeline__item:nth-child(even) { width: 100%; margin-left: 0; padding: 0 0 48px; text-align: center; }
   .timeline__item::before,
-  .timeline__item:nth-child(even)::before { left: 0; right: auto; }
+  .timeline__item:nth-child(even)::before { top: 0; left: 50%; right: auto; margin-left: -8px; }
   .timeline__item::after,
   .timeline__item:nth-child(even)::after { display: none; }
   .timeline__date,
   .timeline__item:nth-child(even) .timeline__date {
     position: static;
-    display: block;
-    margin-bottom: 10px;
+    display: inline-block;
+    margin: 28px 0 10px;
+    padding: 2px 10px;
+    background: var(--night);
   }
+  .timeline__card { background: rgba(18, 11, 27, 0.94); }
 }
 
 .principle-feature {

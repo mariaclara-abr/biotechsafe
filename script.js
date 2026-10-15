@@ -1333,4 +1333,95 @@
 
     calcAtualizarEntradas();
   }
+  /* ---------------- Sobre: linha do tempo (explosão, raios e sensor) ---------------- */
+  var tlField = document.getElementById('timelineField');
+  if (tlField) {
+    var tlRays = tlField.querySelector('.timeline-field__rays');
+    var tlBurst = tlField.querySelector('.timeline-field__burst');
+    var tlItems = tlField.querySelectorAll('.timeline__item');
+    var tlStill = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var tlSpan = 0;
+    var tlTicking = false;
+
+    // Campo de linhas entre a explosão (topo) e o sensor (base), em pixels reais.
+    function tlBuildRays() {
+      var w = tlRays.clientWidth;
+      var h = tlRays.clientHeight;
+      if (!w || !h) return;
+      tlSpan = h;
+      var stops = ['purple', 'blue', 'teal', 'green', 'yellow'].map(function (c, i) {
+        return '<stop offset="' + i / 4 + '" style="stop-color:var(--c-' + c + ')"/>';
+      }).join('');
+      var out = '<defs><linearGradient id="tlRayGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="' + h + '">' + stops + '</linearGradient></defs>';
+      var sides = 16;
+      for (var i = 0; i < sides * 2; i++) {
+        var side = i % 2 ? 1 : -1;
+        var k = (Math.floor(i / 2) + 1) / sides;
+        var reach = k * w * 0.62;
+        var c1 = (w / 2 + side * reach).toFixed(0) + ' ' + (h * 0.08 * Math.sin(i * 2.3)).toFixed(0);
+        var c2 = (w / 2 + side * reach * (0.7 + 0.5 * Math.abs(Math.sin(i)))).toFixed(0) + ' ' + (h * (0.9 + 0.1 * Math.cos(i * 1.7))).toFixed(0);
+        var d = 'M' + w / 2 + ' 0C' + c1 + ' ' + c2 + ' ' + w / 2 + ' ' + h;
+        var o = 0.85 - 0.55 * k;
+        // um traço fino e outro largo e fraco por baixo, para dar brilho sem filtro
+        out += '<path pathLength="1" d="' + d + '" stroke-width="5" style="opacity:' + (o * 0.16).toFixed(2) + '"/>' +
+          '<path pathLength="1" d="' + d + '" stroke-width="' + (0.8 + 0.8 * Math.abs(Math.sin(i * 1.3))).toFixed(1) + '" style="opacity:' + o.toFixed(2) + '"/>';
+      }
+      tlRays.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+      tlRays.innerHTML = out;
+    }
+
+    // Estrela de raios curtos que "explode" a partir do início da linha.
+    function tlBuildBurst() {
+      var lines = '';
+      var colors = ['#fff', 'var(--c-blue)', '#fff', 'var(--c-teal)'];
+      for (var i = 0; i < 56; i++) {
+        var a = (i / 56) * Math.PI * 2 + Math.sin(i * 3.1) * 0.05;
+        var r2 = 32 + 68 * Math.abs(Math.sin(i * 1.7)) * Math.abs(Math.cos(i * 0.6));
+        lines += '<line x1="' + (100 + Math.cos(a) * 8).toFixed(1) + '" y1="' + (100 + Math.sin(a) * 8).toFixed(1) +
+          '" x2="' + (100 + Math.cos(a) * r2).toFixed(1) + '" y2="' + (100 + Math.sin(a) * r2).toFixed(1) +
+          '" style="stroke:' + colors[i % 4] + ';opacity:' + (0.35 + 0.5 * Math.abs(Math.sin(i * 2.9))).toFixed(2) + '"/>';
+      }
+      tlBurst.innerHTML = '<svg viewBox="0 0 200 200">' + lines + '</svg>';
+    }
+
+    // Progresso: a ponta do raio fica a 60% da altura da tela.
+    function tlUpdate() {
+      tlTicking = false;
+      var r = tlField.getBoundingClientRect();
+      var vh = window.innerHeight;
+      var p = tlSpan ? Math.min(1, Math.max(0, (vh * 0.6 - r.top) / tlSpan)) : 1;
+      var head = p * tlSpan;
+      tlItems.forEach(function (item) {
+        if (!item.classList.contains('is-lit') && item.getBoundingClientRect().top - r.top + 12 <= head) {
+          item.classList.add('is-lit');
+        }
+      });
+      tlField.style.setProperty('--p', p.toFixed(4));
+      if (r.top < vh * 0.8) tlField.classList.add('is-burst');
+      if (p >= 0.995) tlField.classList.add('is-unlocked');
+    }
+
+    function tlRequest() {
+      if (!tlTicking) {
+        tlTicking = true;
+        requestAnimationFrame(tlUpdate);
+      }
+    }
+
+    tlBuildBurst();
+    tlBuildRays();
+    if (tlStill) {
+      // Sem movimento: tudo já aparece desenhado e o sensor fica à mostra.
+      tlField.classList.add('is-burst', 'is-unlocked');
+    } else {
+      tlField.classList.add('is-live');
+      tlUpdate();
+      window.addEventListener('scroll', tlRequest, { passive: true });
+      var tlResize;
+      window.addEventListener('resize', function () {
+        clearTimeout(tlResize);
+        tlResize = setTimeout(function () { tlBuildRays(); tlRequest(); }, 120);
+      });
+    }
+  }
 })();
